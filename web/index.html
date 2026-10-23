@@ -31,6 +31,11 @@
         <div class="workspace-grid">
           <section class="config-panel panel"><div class="panel-heading"><span class="step-tag">01</span><h2>定义你的模块</h2><span class="muted">CONFIGURE</span></div>
             <form id="config-form">
+              <section class="preset-picker" aria-labelledby="preset-heading">
+                <div class="preset-heading"><h3 id="preset-heading">常用预选</h3><span>一键选型，再按需调整</span></div>
+                <div id="preset-choices" class="preset-choices" role="group" aria-label="常用预选"></div>
+                <p id="preset-description" class="preset-description" aria-live="polite">点选常用方案，核对零件后加入打印计划。</p>
+              </section>
               <label class="field-label">开启方式</label>
               <div class="type-switch"><button type="button" data-kind="drawer" class="type-card selected"><span class="type-icon">▱</span><span><strong>抽屉式</strong><small>向前拉开 · Drawers</small></span><i></i></button><button type="button" data-kind="sustainer" class="type-card"><span class="type-icon">▰</span><span><strong>翻盖式</strong><small>向上开启 · Sustainers</small></span><i></i></button></div>
               <div class="field-head"><label class="field-label" for="family">宽度系列</label><span class="field-hint">按官方型号选择</span></div>

@@ -1,0 +1,41 @@
+{
+  "defaults": {
+    "kind": "drawer", "family": "S", "depth": 3, "height": 1, "quantity": 1,
+    "drawers": [1], "roof": "grid", "key": "standard", "variant": "standard",
+    "split_roof": false, "interior": "none", "baseplate": "plain", "divider_height": "20",
+    "width_dividers": 1, "depth_dividers": 1, "top_handle": false, "rails": false,
+    "labels": true, "latches": 1, "mount": "none", "base": "none", "wheels": false
+  },
+  "presets": [
+    {
+      "id": "first-drawer", "title": "新手首盒", "model": "S3 · 1F 单抽",
+      "summary": "S3 · 1F 单抽，留空内盒与网格顶盖，从基础装配开始。",
+      "config": {}
+    },
+    {
+      "id": "small-parts", "title": "小物分格", "model": "S3 · 1F 分格",
+      "summary": "S3 · 1F 单抽，20 mm 横纵分隔条各 1 份，分类放置小物。",
+      "config": { "interior": "dividers" }
+    },
+    {
+      "id": "double-drawer", "title": "双抽分类", "model": "M5 · 2F 双抽",
+      "summary": "M5 · 2F 外壳，两个 1F 内抽共用外壳，自动配齐锁定齿条。",
+      "config": { "family": "M", "depth": 5, "height": 2, "drawers": [1, 1] }
+    },
+    {
+      "id": "lidded-box", "title": "翻盖收纳", "model": "S3 · 2F 翻盖",
+      "summary": "S3 · 2F 标准翻盖箱，完整顶盖与留空箱体，自由摆放物品。",
+      "config": { "kind": "sustainer", "height": 2, "drawers": [2], "roof": "none" }
+    },
+    {
+      "id": "tool-divider", "title": "工具分隔", "model": "L5 · 2F 分隔箱",
+      "summary": "L5 · 2F 网格分隔翻盖箱，横纵分隔片各 1 份；打印前核对模型尺寸。",
+      "config": { "kind": "sustainer", "family": "L", "depth": 5, "height": 2, "drawers": [2], "roof": "none", "variant": "dividers", "interior": "dividers" }
+    },
+    {
+      "id": "under-desk", "title": "桌下抽屉", "model": "S3 · 1F 桌下",
+      "summary": "S3 · 1F 单抽，桌下安装顶盖与 1 个锁定连接扣；安装螺丝按桌板另配。",
+      "config": { "roof": "under_table" }
+    }
+  ]
+}

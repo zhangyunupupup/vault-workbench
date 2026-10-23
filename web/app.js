@@ -7,6 +7,7 @@ const kindLabels = { drawer: '抽屉', sustainer: '翻盖箱', mod: '改装配�
 const storageKey = 'vault-workbench-plan-v1';
 let catalog = null, token = '', kind = 'drawer', family = 'S', currentPreview = null;
 let previewSequence = 0, previewTimer, toastTimer, libraryLimit = 70, expanded = false, currentJob = null;
+let presetDefaults = {}, presets = [];
 let queue = { configs: [], manual: [] };
 try {
   const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -51,6 +52,44 @@ function fillSelect(id, options, preferred) {
 function modelsForKind() { return (catalog?.models || []).filter(m => m.kind === kind); }
 function currentModel() { return modelsForKind().find(m => m.family === family && m.depth === +$('depth').value); }
 function modelFiles() { const m = currentModel(); return catalog?.files.filter(f => f.kind === kind && f.model === m?.model) || []; }
+function presetConfig(preset) { return structuredClone({ ...presetDefaults, ...preset.config }); }
+function presetAvailable(preset) {
+  const c = presetConfig(preset);
+  return Boolean(catalog?.models.some(m => m.kind === c.kind && m.family === c.family && m.depth === c.depth && m.verified && m.heights.includes(c.height)));
+}
+function renderPresets() {
+  $('preset-choices').replaceChildren(...presets.map(preset => {
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'preset-chip'; button.dataset.preset = preset.id;
+    button.disabled = !presetAvailable(preset); button.setAttribute('aria-pressed', 'false');
+    button.title = button.disabled ? '当前模型库没有此型号，请先连接对应的模型库。' : preset.summary;
+    button.innerHTML = `<strong>${escapeHTML(preset.title)}</strong><small>${escapeHTML(preset.model)}</small>`;
+    button.addEventListener('click', () => applyPreset(preset)); return button;
+  }));
+}
+function refreshPresetSelection() {
+  if (!presets.length) return;
+  const current = config();
+  const active = presets.find(p => presetAvailable(p) && Object.entries(presetConfig(p)).every(([key, value]) => JSON.stringify(current[key]) === JSON.stringify(value)));
+  for (const button of $('preset-choices').querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.preset === active?.id));
+  $('preset-description').innerHTML = active ? `<strong>${escapeHTML(active.title)}</strong> · ${escapeHTML(active.summary)}` : '当前为自定义配置。也可以点选常用方案，核对零件后加入打印计划。';
+}
+function applyPreset(preset) {
+  if (!presetAvailable(preset)) return;
+  const c = presetConfig(preset);
+  kind = c.kind; family = c.family; expanded = false;
+  document.querySelectorAll('[data-kind]').forEach(b => b.classList.toggle('selected', b.dataset.kind === kind));
+  refreshChoices();
+  $('depth').value = c.depth; refreshChoices();
+  $('height').value = c.height; refreshOptions();
+  const fields = { 'drawer-layout': JSON.stringify(c.drawers), roof: c.roof, key: c.key, variant: c.variant,
+    interior: c.interior, baseplate: c.baseplate, 'divider-height': c.divider_height,
+    'width-dividers': c.width_dividers, 'depth-dividers': c.depth_dividers,
+    latches: c.latches, mount: c.mount, base: c.base, quantity: c.quantity };
+  for (const [id, value] of Object.entries(fields)) $(id).value = value;
+  for (const [id, key] of [['split-roof', 'split_roof'], ['top-handle', 'top_handle'], ['rails', 'rails'], ['labels', 'labels'], ['wheels', 'wheels']]) $(id).checked = c[key];
+  refreshVisibility(); schedulePreview();
+}
 function refreshChoices() {
   if (!catalog) return;
   const families = ['S', 'M', 'L', 'XL', 'L²', 'XL²'].filter(f => modelsForKind().some(m => m.family === f));
@@ -123,6 +162,7 @@ function config() {
     latches: +$('latches').value, mount: kind === 'drawer' ? $('mount').value : 'none', base: $('base').value, wheels: $('wheels').checked };
 }
 function schedulePreview() {
+  refreshPresetSelection();
   clearTimeout(previewTimer); ++previewSequence; currentPreview = null; $('add-plan').disabled = true;
   $('preview-count').textContent = '匹配中'; show('preview-loading', true);
   previewTimer = setTimeout(updatePreview, 160);
@@ -246,7 +286,7 @@ function evidence(id, fromQueue) {
 async function connect(root) {
   $('save-source').disabled = true; $('save-source').textContent = '扫描中…'; show('source-error', false);
   try {
-    const result = await api('/api/scan', { root }); catalog = result.catalog; updateCatalogUI(); refreshChoices(); renderManuals(); renderLibrary();
+    const result = await api('/api/scan', { root }); catalog = result.catalog; updateCatalogUI(); renderPresets(); refreshChoices(); renderManuals(); renderLibrary();
     $('source-dialog').close(); toast(`已连接 ${catalog.count} 个本地模型。`);
   } catch (e) { $('source-error').textContent = e.message; show('source-error', true); }
   finally { $('save-source').disabled = false; $('save-source').textContent = '扫描并连接 ↗'; }
@@ -336,8 +376,11 @@ $('mesh-dialog').addEventListener('close', () => { meshSequence++; viewer.clear(
 async function init() {
   saveQueue();
   try {
-    const state = await api('/api/state'); token = state.token; catalog = state.catalog;
-    updateCatalogUI(); renderManuals(); renderHistory(state.history);
+    const [state, presetData] = await Promise.all([api('/api/state'), api('/assets/presets.json').catch(() => null)]);
+    token = state.token; catalog = state.catalog;
+    if (presetData) { presetDefaults = presetData.defaults; presets = presetData.presets; }
+    else $('preset-description').textContent = '常用预选暂时无法读取，可使用下方配置选项。';
+    updateCatalogUI(); renderPresets(); renderManuals(); renderHistory(state.history);
     if (catalog) refreshChoices();
     else { $('source-error').textContent = state.error || '请连接模型库'; show('source-error', true); $('source-dialog').showModal(); }
     const initialView = location.hash.slice(1); view(['configure', 'library', 'manuals', 'history'].includes(initialView) ? initialView : 'configure');

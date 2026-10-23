@@ -142,6 +142,32 @@ class AssemblyContracts(unittest.TestCase):
         free = plan(self.catalog, {"configs": [{"latches": 0}]})
         self.assertNotIn("Latch.stl", [p["name"] for p in free["parts"]])
 
+    def test_starter_presets_resolve_against_real_catalog(self):
+        data = json.loads((Path(__file__).resolve().parents[1] / "web/assets/presets.json").read_text(encoding="utf-8"))
+        ids = [p["id"] for p in data["presets"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        for preset in data["presets"]:
+            with self.subTest(preset=preset["id"]):
+                cfg = {**data["defaults"], **preset["config"]}
+                self.assertEqual(cfg["quantity"], 1)
+                result = plan(self.catalog, {"configs": [cfg]})
+                self.assertTrue(result["parts"])
+                for part in result["parts"]:
+                    self.assertTrue(self.catalog.resolve(part["id"]).is_file())
+
+    def test_starter_presets_include_classification_and_mount_dependencies(self):
+        data = json.loads((Path(__file__).resolve().parents[1] / "web/assets/presets.json").read_text(encoding="utf-8"))
+        plans = {p["id"]: plan(self.catalog, {"configs": [{**data["defaults"], **p["config"]}]}) for p in data["presets"]}
+        double = {p["name"]: p["copies"] for p in plans["double-drawer"]["parts"]}
+        self.assertEqual(double["M5 Module 2F.stl"], 1)
+        self.assertEqual(double["M5 Box 1F.stl"], 2)
+        self.assertEqual(double["M Rails.stl"], 2)
+        desk = {p["name"]: p["copies"] for p in plans["under-desk"]["parts"]}
+        self.assertEqual(desk["S3 Under Table Mount Roof.stl"], 1)
+        self.assertEqual(desk["Latch.stl"], 1)
+        for key in ("small-parts", "tool-divider"):
+            self.assertTrue(any("分隔" in p["title"] for p in plans[key]["parts"]))
+
 
 class ExportContracts(unittest.TestCase):
     def test_zip_round_trip_integrity_and_unmodified_source(self):

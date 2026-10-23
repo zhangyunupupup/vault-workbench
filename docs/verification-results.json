@@ -2,7 +2,7 @@
   "inventory": 723,
   "default_body_variants": 135,
   "option_combinations_checked": 508,
-  "unit_tests": 17,
+  "unit_tests": 19,
   "real_exports": [
     {
       "zip": "C:\\Users\\75192\\Documents\\ChatGPT\\VAULT工作台\\exports\\VAULT-20261022-174319-88ceced2388b\\VAULT打印包.zip",
@@ -28,6 +28,10 @@
     "STL viewer",
     "multiple drawers",
     "manual copy updates",
-    "plan persistence"
+    "plan persistence",
+    "all six starter presets match their displayed configurations",
+    "custom edits clear preset selection",
+    "preset resets previous accessories, quantities and invalid inputs",
+    "preset selection does not add queue items"
   ]
 }
