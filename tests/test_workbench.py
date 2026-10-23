@@ -5,6 +5,7 @@ import tempfile
 import time
 import unittest
 import zipfile
+from urllib.parse import urlparse
 
 from vault.catalog import Catalog, DEFAULT_ROOT, ValidationError
 from vault.exporter import ExportManager
@@ -167,6 +168,46 @@ class AssemblyContracts(unittest.TestCase):
         self.assertEqual(desk["Latch.stl"], 1)
         for key in ("small-parts", "tool-divider"):
             self.assertTrue(any("分隔" in p["title"] for p in plans[key]["parts"]))
+
+
+class OfficialImageContracts(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.base = Path(__file__).resolve().parents[1]
+        cls.images = json.loads((cls.base / "web/assets/official-images.json").read_text(encoding="utf-8"))["images"]
+
+    def test_official_original_images_cover_standard_models_and_match_sources(self):
+        expected = {f"{kind}:{family}{depth}" for kind in ("drawer", "sustainer")
+                    for family in ("S", "M", "L", "XL") for depth in range(3, 8)}
+        self.assertEqual(set(self.images), expected)
+        for key, entry in self.images.items():
+            with self.subTest(key=key):
+                kind, model = key.split(":")
+                self.assertEqual((entry["kind"], entry["model"]), (kind, model))
+                self.assertEqual(entry["scope"], "model-family")
+                self.assertEqual(entry["presentation"], "original")
+                folder = "drawers" if kind == "drawer" else "sustainers"
+                self.assertEqual(entry["original_asset"], f"vault-family-chooser/images/{folder}/{model}.jpg")
+                source = urlparse(entry["source"])
+                self.assertEqual((source.scheme, source.netloc), ("https", "www.ussadesign.com"))
+                self.assertIn(f"images-{folder}-{model}.", source.path)
+                self.assertNotIn("studio", source.path)
+                path = (self.base / "web" / entry["src"].lstrip("/")).resolve()
+                self.assertTrue(path.is_relative_to(self.base / "web/assets/models"))
+                data = path.read_bytes()
+                self.assertEqual(len(data), entry["bytes"])
+                self.assertEqual(hashlib.sha256(data).hexdigest(), entry["sha256"])
+                self.assertTrue(data.startswith((b"\xff\xd8\xff", b"RIFF", b"\x89PNG")))
+        # Special double-column families must never silently borrow ordinary L/XL images.
+        self.assertNotIn("drawer:L3²", self.images)
+        self.assertNotIn("drawer:XL3²", self.images)
+
+    def test_every_starter_preset_has_a_matching_model_image(self):
+        data = json.loads((self.base / "web/assets/presets.json").read_text(encoding="utf-8"))
+        for preset in data["presets"]:
+            cfg = {**data["defaults"], **preset["config"]}
+            with self.subTest(preset=preset["id"]):
+                self.assertIn(f"{cfg['kind']}:{cfg['family']}{cfg['depth']}", self.images)
 
 
 class ExportContracts(unittest.TestCase):

@@ -8,6 +8,7 @@ const storageKey = 'vault-workbench-plan-v1';
 let catalog = null, token = '', kind = 'drawer', family = 'S', currentPreview = null;
 let previewSequence = 0, previewTimer, toastTimer, libraryLimit = 70, expanded = false, currentJob = null;
 let presetDefaults = {}, presets = [];
+let officialImages = {}, displayedProductImage = null;
 let queue = { configs: [], manual: [] };
 try {
   const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -148,9 +149,31 @@ function refreshVisibility() {
   $('model-pill').textContent = `${currentModel()?.model || ''} · ${h}F`;
   $('product-name').textContent = kind === 'drawer' ? '桌面小物，各得其所。' : '打开下一份井然有序。';
   $('product-subtitle').textContent = `${family} 系列${kindLabels[kind]} · ${$('depth').value} 格深度 · ${h}F 高度`;
-  $('product-image').src = `/assets/${kind === 'drawer' ? 'drawer' : 'sustainer'}.jpg`;
-  $('product-image').alt = `VAULT ${kindLabels[kind]}官方示意，非当前配置的精确渲染`;
-  $('product-image').classList.toggle('case-image', kind === 'sustainer');
+  updateProductImage();
+}
+function updateProductImage(fallback = false) {
+  const model = currentModel()?.model || family + $('depth').value;
+  const entry = fallback ? null : officialImages[`${kind}:${model}`];
+  displayedProductImage = entry ? {
+    src: entry.src, source: entry.source, official: true,
+    title: `${model} ${kindLabels[kind]} · 官网系列图`,
+    alt: `USSA 官网原图：${model} ${kindLabels[kind]}型号系列，可能含多种高度`,
+    credit: `USSA 官网 · ${model} ${kindLabels[kind]}系列图 ↗`,
+    note: '同型号系列图可能含多种高度；当前顶盖、内抽及配件以零件清单为准。',
+  } : {
+    src: `/assets/${kind === 'drawer' ? 'drawer' : 'sustainer'}.jpg`, source: '/api/docs/1', official: false,
+    title: '官方手册 · 装配示意', alt: `VAULT ${kindLabels[kind]}装配示意，非 ${model} 的专属图片`,
+    credit: 'USSA 官方手册 · 装配示意 ↗',
+    note: fallback ? `${model} 图片暂时无法读取，当前显示装配示意。` : `${model} 暂无专属官网图，当前显示装配示意。`,
+  };
+  const image = $('product-image'), shown = displayedProductImage;
+  image.alt = shown.alt;
+  image.classList.toggle('case-image', !entry && kind === 'sustainer');
+  image.classList.toggle('official-model-image', Boolean(entry));
+  image.closest('.product-visual').classList.toggle('official-visual', Boolean(entry));
+  $('model-image-source').textContent = shown.credit; $('model-image-source').href = shown.source;
+  $('image-scope').textContent = shown.note;
+  if (image.getAttribute('src') !== shown.src) image.src = shown.src;
 }
 function config() {
   return { kind, family, depth: +$('depth').value, height: +$('height').value, quantity: +$('quantity').value,
@@ -367,6 +390,11 @@ $('rescan-button').addEventListener('click', async () => {
 $('open-output').addEventListener('click', () => api('/api/open-output', {}).catch(e => toast(e.message, true)));
 $('quick-guide').addEventListener('click', () => info('从选择到打印，只需要四步。', '<p>① 选择抽屉式或翻盖式，按官方型号选择宽度、深度和高度。</p><p>② 配置内抽、顶盖与内部收纳，右侧会显示所需文件和整份 STL 打印次数。</p><p>③ 加入打印计划。多个箱子、配件补打可以合并导出，同一文件只存一份。</p><p>④ 在打印计划中点击「整理并打包 ZIP」，到导出记录下载打印包，导入切片器。</p><div class="notice">不确定型号时，先阅读「中文装配指引」。只想补打某个零件，可以直接到模型库搜索。</div>'));
 $('parts-guide').addEventListener('click', () => info(`${kindLabels[kind]}零件命名 · 官方示意`, `<img src="/assets/${kind === 'drawer' ? 'drawer' : 'sustainer'}-parts.jpg" alt="官方零件命名图"><p class="field-description">来源：01_Instructions Manual.pdf 第${kind === 'drawer' ? 11 : 12}页。图中型号用于说明部件名称，不代表当前配置。</p>`));
+$('product-image').addEventListener('error', () => { if (displayedProductImage?.official) updateProductImage(true); });
+$('model-image-expand').addEventListener('click', () => {
+  const shown = displayedProductImage; if (!shown) return;
+  info(shown.title, `<img src="${escapeHTML(shown.src)}" alt="${escapeHTML(shown.alt)}"><p class="field-description">${escapeHTML(shown.note)}</p><a class="text-button" href="${escapeHTML(shown.source)}" target="_blank" rel="noopener noreferrer">${escapeHTML(shown.credit)}</a>`);
+});
 $('show-hardware').addEventListener('click', () => {
   if (!currentPreview) return toast('请先选择一个通过核对的配置。', true);
   info('本次五金参考清单', '<table class="data-table"><thead><tr><th>规格</th><th>数量</th><th>用途与依据</th></tr></thead><tbody>' + currentPreview.hardware.map(h => `<tr><td>${escapeHTML(h.name)}</td><td>${h.quantity}</td><td>${escapeHTML(h.reason)}<small>${escapeHTML(h.source)}<br>${escapeHTML(h.status)}</small></td></tr>`).join('') + '</tbody></table><div class="notice warning">官方总表和细分图存在数量差异。采购和装配前，请按实际型号孔位核对参考项。</div>');
@@ -376,8 +404,9 @@ $('mesh-dialog').addEventListener('close', () => { meshSequence++; viewer.clear(
 async function init() {
   saveQueue();
   try {
-    const [state, presetData] = await Promise.all([api('/api/state'), api('/assets/presets.json').catch(() => null)]);
+    const [state, presetData, imageData] = await Promise.all([api('/api/state'), api('/assets/presets.json').catch(() => null), api('/assets/official-images.json').catch(() => null)]);
     token = state.token; catalog = state.catalog;
+    officialImages = imageData?.images || {};
     if (presetData) { presetDefaults = presetData.defaults; presets = presetData.presets; }
     else $('preset-description').textContent = '常用预选暂时无法读取，可使用下方配置选项。';
     updateCatalogUI(); renderPresets(); renderManuals(); renderHistory(state.history);

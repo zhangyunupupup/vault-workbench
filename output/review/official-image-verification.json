@@ -1,0 +1,361 @@
+{
+  "date": "2026-10-24",
+  "unitTests": 21,
+  "images": [
+    {
+      "key": "drawer:S3",
+      "alt": "USSA 官网原图：S3 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-S3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:S4",
+      "alt": "USSA 官网原图：S4 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-S4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:S5",
+      "alt": "USSA 官网原图：S5 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-S5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:S6",
+      "alt": "USSA 官网原图：S6 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-S6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:S7",
+      "alt": "USSA 官网原图：S7 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-S7.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:M3",
+      "alt": "USSA 官网原图：M3 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-M3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:M4",
+      "alt": "USSA 官网原图：M4 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-M4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:M5",
+      "alt": "USSA 官网原图：M5 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-M5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:M6",
+      "alt": "USSA 官网原图：M6 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-M6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:M7",
+      "alt": "USSA 官网原图：M7 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-M7.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:L3",
+      "alt": "USSA 官网原图：L3 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-L3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:L4",
+      "alt": "USSA 官网原图：L4 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-L4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:L5",
+      "alt": "USSA 官网原图：L5 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-L5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:L6",
+      "alt": "USSA 官网原图：L6 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-L6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:L7",
+      "alt": "USSA 官网原图：L7 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-L7.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:XL3",
+      "alt": "USSA 官网原图：XL3 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-XL3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:XL4",
+      "alt": "USSA 官网原图：XL4 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-XL4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:XL5",
+      "alt": "USSA 官网原图：XL5 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-XL5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:XL6",
+      "alt": "USSA 官网原图：XL6 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-XL6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "drawer:XL7",
+      "alt": "USSA 官网原图：XL7 抽屉型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/drawer-XL7.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:S3",
+      "alt": "USSA 官网原图：S3 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-S3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:S4",
+      "alt": "USSA 官网原图：S4 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-S4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:S5",
+      "alt": "USSA 官网原图：S5 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-S5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:S6",
+      "alt": "USSA 官网原图：S6 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-S6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:S7",
+      "alt": "USSA 官网原图：S7 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-S7.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:M3",
+      "alt": "USSA 官网原图：M3 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-M3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:M4",
+      "alt": "USSA 官网原图：M4 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-M4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:M5",
+      "alt": "USSA 官网原图：M5 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-M5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:M6",
+      "alt": "USSA 官网原图：M6 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-M6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:M7",
+      "alt": "USSA 官网原图：M7 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-M7.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:L3",
+      "alt": "USSA 官网原图：L3 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-L3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:L4",
+      "alt": "USSA 官网原图：L4 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-L4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:L5",
+      "alt": "USSA 官网原图：L5 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-L5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:L6",
+      "alt": "USSA 官网原图：L6 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-L6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:L7",
+      "alt": "USSA 官网原图：L7 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-L7.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:XL3",
+      "alt": "USSA 官网原图：XL3 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-XL3.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:XL4",
+      "alt": "USSA 官网原图：XL4 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-XL4.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:XL5",
+      "alt": "USSA 官网原图：XL5 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-XL5.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:XL6",
+      "alt": "USSA 官网原图：XL6 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-XL6.jpg",
+      "width": 1600
+    },
+    {
+      "key": "sustainer:XL7",
+      "alt": "USSA 官网原图：XL7 翻盖箱型号系列，可能含多种高度",
+      "height": 1200,
+      "loaded": true,
+      "src": "/assets/models/sustainer-XL7.jpg",
+      "width": 1600
+    }
+  ],
+  "presets": [
+    {
+      "id": "first-drawer",
+      "src": "/assets/models/drawer-S3.jpg",
+      "credit": "USSA 官网 · S3 抽屉系列图 ↗"
+    },
+    {
+      "id": "small-parts",
+      "src": "/assets/models/drawer-S3.jpg",
+      "credit": "USSA 官网 · S3 抽屉系列图 ↗"
+    },
+    {
+      "id": "double-drawer",
+      "src": "/assets/models/drawer-M5.jpg",
+      "credit": "USSA 官网 · M5 抽屉系列图 ↗"
+    },
+    {
+      "id": "lidded-box",
+      "src": "/assets/models/sustainer-S3.jpg",
+      "credit": "USSA 官网 · S3 翻盖箱系列图 ↗"
+    },
+    {
+      "id": "tool-divider",
+      "src": "/assets/models/sustainer-L5.jpg",
+      "credit": "USSA 官网 · L5 翻盖箱系列图 ↗"
+    },
+    {
+      "id": "under-desk",
+      "src": "/assets/models/drawer-S3.jpg",
+      "credit": "USSA 官网 · S3 抽屉系列图 ↗"
+    }
+  ],
+  "specialFamilyFallback": "passed; drawer:L7² uses explicitly labelled assembly illustration",
+  "missingImageFallback": "passed; absent uncached L5 URL falls back to assembly illustration; add plan remains enabled",
+  "fullImageDialog": "passed; correct L5 sustainer image and original source link"
+}
