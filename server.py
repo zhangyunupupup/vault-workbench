@@ -1,7 +1,7 @@
 """VAULT Workbench. Python 3.10+, standard library only; loopback only."""
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote, parse_qs
 import argparse
 import json
 import mimetypes
@@ -15,6 +15,7 @@ from vault.exporter import ExportManager
 from vault.geometry import preview
 from vault.recipes import plan
 from vault.scene import validate_scene
+from vault.assembly import assembly, mesh_header
 
 
 BASE = Path(__file__).resolve().parent
@@ -112,6 +113,13 @@ class Handler(BaseHTTPRequestHandler):
                 source = current_catalog().resolve(route.rsplit("/", 1)[-1])
                 stat = source.stat()
                 return self.json(preview(str(source), stat.st_size, stat.st_mtime_ns))
+            if route.startswith('/api/assembly-mesh/'):
+                source = current_catalog().resolve(route.rsplit('/', 1)[-1])
+                meta = mesh_header(source)
+                revision = parse_qs(urlparse(self.path).query).get('revision', [''])[0]
+                if revision != meta['mtime_ns']:
+                    raise ValidationError('模型文件已变化，请重新加载装配步骤。')
+                return self.file(source, 'application/octet-stream')
             if route == "/":
                 return self.file(BASE / "web" / "index.html", "text/html; charset=utf-8")
             if route.startswith("/assets/"):
@@ -119,7 +127,7 @@ class Handler(BaseHTTPRequestHandler):
                 if not path.is_relative_to(BASE / "web" / "assets"):
                     raise ValidationError("无效的资源路径。")
                 return self.file(path)
-            if route in ("/app.js", "/styles.css", "/viewer.js", "/builder.js", "/builder-stage.js", "/builder.css"):
+            if route in ("/app.js", "/styles.css", "/viewer.js", "/builder.js", "/builder-stage.js", "/builder.css", "/assembly.js", "/assembly-stage.js", "/assembly.css"):
                 return self.file(BASE / "web" / route[1:])
             return self.json({"error": "页面不存在。"}, 404)
         except ValidationError as exc:
@@ -152,6 +160,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.json(plan(current_catalog(), payload))
             if route == '/api/scene':
                 return self.json(validate_scene(current_catalog(), payload))
+            if route == '/api/assembly':
+                return self.json(assembly(current_catalog(), payload))
             if route == "/api/export":
                 return self.json(EXPORTS.start(current_catalog(), payload), 202)
             if route == "/api/open-output":

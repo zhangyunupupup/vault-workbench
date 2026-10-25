@@ -16,6 +16,9 @@ export function initBuilder({api,getConfig,getCatalog,onExport,toast}) {
   <section class="builder-results panel"><div class="builder-result-heading"><div><span class="eyebrow">03 / CHECK & PRINT</span><h2>核对布局，准备打印</h2></div><div><button id="build-csv" class="outline-button" disabled>打印清单 CSV ↓</button><button id="build-export" class="primary-button" disabled>按颜色打包 ZIP ↗</button></div></div><div id="build-message" role="status"></div><div id="build-checks"></div><div id="build-totals"></div><div class="builder-table-wrap"><table class="data-table"><thead><tr><th>颜色 / 材料</th><th>零件与原始文件</th><th>整份打印次数</th><th>支撑</th></tr></thead><tbody id="build-parts"></tbody></table></div><details class="builder-hardware"><summary>五金用量与依据</summary><div id="build-hardware"></div></details><p class="field-description">颜色分别建目录；保留原始 STL 字节和文件名。打包同时附带组合方案、打印清单及五金清单。</p></section>`;
 
   const current=()=>scene.items.find(i=>i.id===selected);
+  const assemblyButton=document.createElement('button');assemblyButton.id='build-assembly';assemblyButton.className='outline-button';assemblyButton.textContent='查看选中箱体的装配步骤 ↗';
+  $('build-fields').prepend(assemblyButton);
+  assemblyButton.onclick=()=>{const item=current();if(item)window.dispatchEvent(new CustomEvent('assembly-request',{detail:{config:clone(item.config),colors:clone(item.colors)}}));};
   const setMessage=(s,error=false)=>{ $('build-message').textContent=s; $('build-message').className=error?'notice warning':'field-description'; };
   function saveLocal() {try{localStorage.setItem(key,JSON.stringify(scene));}catch{toast('自动保存失败，请点击保存方案下载 JSON。',true);}}
   function refreshModels() {

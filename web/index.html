@@ -7,6 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ef672f'/%3E%3Cpath d='M15 17l17 32 17-32H38l-6 13-6-13z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/builder.css">
+  <link rel="stylesheet" href="/assembly.css">
 </head>
 <body>
   <aside class="sidebar">
@@ -16,6 +17,7 @@
     <nav aria-label="主导航">
       <button class="nav-item active" data-view="configure"><span class="nav-icon">◫</span> 配置打印 <span class="nav-arrow">↗</span></button>
       <button class="nav-item" data-view="builder"><span class="nav-icon">◇</span> 组合搭建 <span class="nav-count">NEW</span></button>
+      <button class="nav-item" data-view="assembly"><span class="nav-icon">◈</span> 装配演示 <span class="nav-count">NEW</span></button>
       <button class="nav-item" data-view="library"><span class="nav-icon">▦</span> 模型库 <span id="nav-file-count" class="nav-count">—</span></button>
       <button class="nav-item" data-view="manuals"><span class="nav-icon">▤</span> 中文装配指引</button>
       <button class="nav-item" data-view="history"><span class="nav-icon">◷</span> 导出记录</button>
@@ -61,10 +63,11 @@
         <div class="bottom-caption"><span>为实际需求配置，而不是在文件夹中寻找。</span><span>VAULT / PRINT WHAT YOU NEED</span></div>
       </section>
       <section id="builder-view" class="view hidden"></section>
+      <section id="assembly-view" class="view hidden"></section>
       <section id="library-view" class="view hidden"><div class="page-heading"><div><div class="eyebrow">THE WHOLE COLLECTION</div><h1>模型库<span> / 按需补打</span></h1><p>搜索型号、英文零件名或中文用途。每次选择按整份 STL 计数。</p></div></div><div class="library-toolbar"><input id="library-search" type="search" placeholder="搜索，例如：S3、滑轨、铰链、TPU…" aria-label="搜索模型"><select id="library-kind" aria-label="模型分类"><option value="">全部分类</option><option value="drawer">抽屉</option><option value="sustainer">翻盖箱</option><option value="mod">改装配件</option></select><span id="library-count"></span></div><div class="notice">补打模式只导出你选中的文件，不自动补齐装配依赖。双列外壳与尚未核实的配件可在这里查找。</div><div class="panel library-table-wrap"><table class="library-table"><thead><tr><th>零件 / 原始文件名</th><th>分类</th><th>文件大小</th><th>操作</th></tr></thead><tbody id="library-body"></tbody></table><div id="library-more"></div></div></section>
       <section id="manuals-view" class="view hidden"><div class="page-heading"><div><div class="eyebrow">UNDERSTAND BEFORE YOU PRINT</div><h1>装配有依据，<span>选择有把握。</span></h1><p>中文要点帮助你理解流程，装配细节可随时对照原版图示。</p></div></div><div class="manual-grid" id="manual-grid"></div><section class="panel rule-notes"><h2>开始前，先记住这几件事</h2><div class="rules-grid"><div><span>01</span><h3>文件份数 ≠ 零件个数</h3><p>一份弹簧或滑轨 STL 通常已含一对；一份翻盖锁销包含整套四根。按打印清单的份数导入。</p></div><div><span>02</span><h3>顶盖与外壳分开选</h3><p>抽屉叠放的中间层可以不加顶盖。翻盖箱的完整顶盖与分体顶盖互斥，分体需要连接件。</p></div><div><span>03</span><h3>看尺寸，也看打印空间</h3><p>模型预览显示 STL 坐标轴尺寸。导入切片器后仍需检查朝向、支撑和打印机可用空间。</p></div><div><span>04</span><h3>五金按实际孔位确认</h3><p>官方总表与细分图存在差异。工作台标出依据及参考项，请用实际模型和装配图核对。</p></div></div></section></section>
       <section id="history-view" class="view hidden"><div class="page-heading"><div><div class="eyebrow">READY WHEN YOU ARE</div><h1>每次打印，<span>都有记录。</span></h1><p>ZIP、中文清单与原文件校验记录保存在本机。</p></div><button class="outline-button" id="open-output">打开导出文件夹 ↗</button></div><div id="export-progress"></div><div id="history-list"></div></section>
-    </main><footer class="app-footer"><span>VAULT 中文打印工作台</span><span>基于你的本地 USSA 文件库 · 非 USSA 官方软件</span><span>V1.1 / OFFLINE READY</span></footer>
+    </main><footer class="app-footer"><span>VAULT 中文打印工作台</span><span>基于你的本地 USSA 文件库 · 非 USSA 官方软件</span><span>V1.2 / OFFLINE READY</span></footer>
   </div>
   <div id="toast" role="status" class="toast hidden"></div>
   <dialog id="plan-dialog" class="plan-dialog"><div class="dialog-heading"><div><span class="eyebrow">PRINT QUEUE</span><h2>你的打印计划</h2></div><button class="icon-button close-dialog" aria-label="关闭">×</button></div><div id="plan-items"></div><div id="plan-summary"></div><div id="plan-errors" class="notice warning hidden"></div><div id="plan-parts"></div><div class="dialog-bottom"><button class="text-button" id="clear-plan">清空计划</button><button class="primary-button" id="export-button">整理并打包 ZIP <span>↗</span></button></div></dialog>
