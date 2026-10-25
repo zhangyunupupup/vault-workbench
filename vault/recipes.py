@@ -307,6 +307,14 @@ class Recipe:
 def plan(catalog, payload):
     if not isinstance(payload, dict):
         raise ValidationError("计划格式无效。")
+    from .colors import validate_colors, colored, task_key
+    layout = None
+    if 'scene' in payload:
+        from .scene import validate_scene
+        layout = validate_scene(catalog, payload['scene'])
+        if not layout['valid']:
+            raise ValidationError('组合存在碰撞或悬空，请先修正布局再生成打印计划。')
+        payload = {'configs': [i['config'] for i in layout['scene']['items']], 'manual': []}
     configs = payload.get("configs", [])
     manual = payload.get("manual", [])
     if not isinstance(configs, list) or not isinstance(manual, list) or len(configs) > 100 or len(manual) > 1000:
@@ -317,10 +325,13 @@ def plan(catalog, payload):
     notes = []
     for result in results:
         notes.extend(result["notes"])
+        colors = validate_colors(result['config']['colors']) if 'colors' in result['config'] else None
         for part in result["parts"]:
-            if part["id"] not in combined:
-                combined[part["id"]] = {**part, "copies": 0}
-            combined[part["id"]]["copies"] += part["copies"]
+            part = colored(part, colors)
+            key = task_key(part)
+            if key not in combined:
+                combined[key] = {**part, "copies": 0}
+            combined[key]["copies"] += part["copies"]
         for h in result["hardware"]:
             key = (h["name"], h["status"], h["reason"])
             if key not in hardware:
@@ -333,16 +344,21 @@ def plan(catalog, payload):
         entry = catalog.by_id.get(item.get("id"))
         if not entry:
             raise ValidationError("补打文件已不在索引中，请重新选择。")
-        if entry.id not in combined:
-            combined[entry.id] = {**entry.public(), "copies": 0, "reason": "用户手动选择补打",
+        key = task_key(entry.public())
+        if key not in combined:
+            combined[key] = {**entry.public(), "copies": 0, "reason": "用户手动选择补打",
                                   "source": "手动选择，不代表完整装配套件", "optional": True, "unit": "整份 STL / 次"}
-        combined[entry.id]["copies"] += copies
+        combined[key]["copies"] += copies
     if manual:
         notes.append("手动补打文件按整份 STL 计算。数量与兼容性由所选补打需求决定，不自动补齐依赖。")
     parts = list(combined.values())
     for part in parts:
         catalog.resolve(part["id"])
-    return {"configs": configs, "manual": manual, "titles": [r["title"] for r in results],
+    if layout:
+        notes.extend(c['message'] for c in layout['checks'] if c['level'] == 'warning')
+        notes.append(layout['note'])
+    return {**({'scene': layout['scene'], 'layout_checks': layout['checks']} if layout else {}),
+            "configs": configs, "manual": manual, "titles": [r["title"] for r in results],
             "parts": parts, "hardware": list(hardware.values()), "notes": list(dict.fromkeys(notes)),
             "file_count": len(parts), "copies": sum(p["copies"] for p in parts),
             "bytes": sum(p["size"] for p in parts)}

@@ -14,6 +14,7 @@ from vault.catalog import Catalog, DEFAULT_ROOT, DOCS, ValidationError
 from vault.exporter import ExportManager
 from vault.geometry import preview
 from vault.recipes import plan
+from vault.scene import validate_scene
 
 
 BASE = Path(__file__).resolve().parent
@@ -118,7 +119,7 @@ class Handler(BaseHTTPRequestHandler):
                 if not path.is_relative_to(BASE / "web" / "assets"):
                     raise ValidationError("无效的资源路径。")
                 return self.file(path)
-            if route in ("/app.js", "/styles.css", "/viewer.js"):
+            if route in ("/app.js", "/styles.css", "/viewer.js", "/builder.js", "/builder-stage.js", "/builder.css"):
                 return self.file(BASE / "web" / route[1:])
             return self.json({"error": "页面不存在。"}, 404)
         except ValidationError as exc:
@@ -149,6 +150,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.json({"catalog": scan(root.strip()).public()})
             if route == "/api/preview":
                 return self.json(plan(current_catalog(), payload))
+            if route == '/api/scene':
+                return self.json(validate_scene(current_catalog(), payload))
             if route == "/api/export":
                 return self.json(EXPORTS.start(current_catalog(), payload), 202)
             if route == "/api/open-output":

@@ -1,4 +1,5 @@
 import { MeshViewer } from '/viewer.js';
+import { initBuilder } from '/builder.js';
 
 const $ = id => document.getElementById(id);
 const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -37,10 +38,11 @@ function saveQueue() {
 function view(name) {
   for (const item of document.querySelectorAll('.view')) item.classList.toggle('hidden', item.id !== name + '-view');
   for (const item of document.querySelectorAll('.nav-item')) item.classList.toggle('active', item.dataset.view === name);
-  $('page-name').textContent = { configure: '配置打印', library: '模型库', manuals: '中文装配指引', history: '导出记录' }[name];
+  $('page-name').textContent = { configure: '配置打印', builder: '组合搭建', library: '模型库', manuals: '中文装配指引', history: '导出记录' }[name];
   history.replaceState(null, '', '#' + name);
   if (name === 'library') renderLibrary();
   if (name === 'history') loadHistory();
+  if (name === 'builder') $('builder-view').dispatchEvent(new Event('builder-open'));
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 function fillSelect(id, options, preferred) {
@@ -410,9 +412,10 @@ async function init() {
     if (presetData) { presetDefaults = presetData.defaults; presets = presetData.presets; }
     else $('preset-description').textContent = '常用预选暂时无法读取，可使用下方配置选项。';
     updateCatalogUI(); renderPresets(); renderManuals(); renderHistory(state.history);
+    initBuilder({api, getConfig: config, getCatalog: () => catalog, toast, onExport: job => {view('history');pollJob(job.id);}});
     if (catalog) refreshChoices();
     else { $('source-error').textContent = state.error || '请连接模型库'; show('source-error', true); $('source-dialog').showModal(); }
-    const initialView = location.hash.slice(1); view(['configure', 'library', 'manuals', 'history'].includes(initialView) ? initialView : 'configure');
+    const initialView = location.hash.slice(1); view(['configure', 'builder', 'library', 'manuals', 'history'].includes(initialView) ? initialView : 'configure');
     const running = state.history.find(j => ['queued', 'running'].includes(j.status));
     if (running) pollJob(running.id);
   } catch (e) { toast('无法连接本地服务：' + e.message, true); $('sidebar-source').textContent = '连接失败，请重新启动工作台'; }

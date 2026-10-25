@@ -63,7 +63,8 @@ class ExportManager:
                 for part in manifest["parts"]:
                     source = catalog.resolve(part["id"])
                     initial = source.stat()
-                    arcname = "STL/" + part["group"] + "/" + part["relative"]
+                    color_folder = (part['color'].lstrip('#') + '/') if part.get('color') else ''
+                    arcname = "STL/" + color_folder + part["group"] + "/" + part["relative"]
                     digest = hashlib.sha256()
                     copied = 0
                     job.update(current=part["name"])
@@ -80,8 +81,8 @@ class ExportManager:
                     part["sha256"] = digest.hexdigest()
                     part["archive_path"] = arcname
                 print_csv = csv_bytes(
-                    ["中文零件名称", "原始文件名", "整份STL打印次数", "文件内单位", "材料", "开启支撑", "用途", "来源", "原始相对路径", "包内路径", "SHA256"],
-                    [[p["title"], p["name"], p["copies"], p["unit"], p["material"], "是" if p["supports"] else "未特别标注，仍需切片检查",
+                    ["中文零件名称", "原始文件名", "整份STL打印次数", "文件内单位", "材料", "颜色HEX", "开启支撑", "用途", "来源", "原始相对路径", "包内路径", "SHA256"],
+                    [[p["title"], p["name"], p["copies"], p["unit"], p["material"], p.get('color', '未指定'), "是" if p["supports"] else "未特别标注，仍需切片检查",
                       p["reason"], p["source"], p["relative"], p["archive_path"], p["sha256"]] for p in manifest["parts"]])
                 hardware_csv = csv_bytes(["五金规格", "数量", "用途", "依据", "核对状态"],
                     [[h["name"], h["quantity"], h["reason"], h["source"], h["status"]] for h in snapshot["hardware"]])
@@ -89,6 +90,8 @@ class ExportManager:
                 text_files = {"manifest.json": json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"),
                               "打印清单.csv": print_csv, "五金清单.csv": hardware_csv,
                               "打印说明.txt": instructions.encode("utf-8-sig")}
+                if 'scene' in snapshot:
+                    text_files['组合方案.json'] = json.dumps(snapshot['scene'], ensure_ascii=False, indent=2).encode('utf-8')
                 for name, contents in text_files.items():
                     archive.writestr(name, contents)
             # No completed history entry appears until the full ZIP is closed.
