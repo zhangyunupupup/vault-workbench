@@ -37,7 +37,7 @@ export class AssemblyStage {
     this.renderer.domElement.addEventListener('pointerup',e=>{
       if(e.button!==0||!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5)return;
       const r=this.renderer.domElement.getBoundingClientRect();this.pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
-      this.ray.setFromCamera(this.pointer,this.camera);const hit=this.ray.intersectObjects(this.parts.map(p=>p.group),true)[0];
+      this.ray.setFromCamera(this.pointer,this.camera);const hit=this.ray.intersectObjects(this.parts.filter(p=>p.group.visible).map(p=>p.group),true)[0];
       if(hit)this.onSelect(hit.object.userData.id);
     });
     this.renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();this.clear();onError('三维画布已暂停，请重新加载页面。文字步骤和手册仍可使用。');});
@@ -47,9 +47,9 @@ export class AssemblyStage {
   clear(){
     this.epoch++;this.abort?.abort();cancelAnimationFrame(this.frame);
     for(const p of this.parts){this.scene.remove(p.group);p.geometry.dispose();p.material.dispose();p.label.remove();}
-    this.parts=[];this.draw();
+    this.parts=[];this.joint=null;this.draw();
   }
-  async load(parts,onProgress){
+  async load(parts,onProgress,joint=null){
     this.clear();const epoch=this.epoch;this.abort=new AbortController();const signal=this.abort.signal;let index=0,completed=0;
     const worker=async()=>{
       while(index<parts.length){
@@ -59,6 +59,12 @@ export class AssemblyStage {
         if(!response.ok){let data;try{data=await response.json();}catch{}throw Error(data?.error||'无法读取本地模型。');}
         const buffer=await response.arrayBuffer();if(epoch!==this.epoch)return;
         if(buffer.byteLength!==part.bytes)throw Error('模型大小已变化，请重新扫描模型库。');
+        const expected=joint?.instances.find(i=>i.id===part.id)?.sha256;
+        if(expected){
+          const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)),b=>b.toString(16).padStart(2,'0')).join('');
+          if(epoch!==this.epoch)return;
+          if(hash!==expected)throw Error('旋钮组件文件版本已变化，不能使用已核对的定位数据。');
+        }
         const {geometry,size}=readSTL(buffer);
         const group=new THREE.Group(),material=new THREE.MeshStandardMaterial({color:part.color,roughness:.66,metalness:.04,side:THREE.DoubleSide});
         for(let c=0;c<part.copies;c++){const mesh=new THREE.Mesh(geometry,material);mesh.userData.id=part.id;mesh.position.x=(c-(part.copies-1)/2)*(size[0]+12);group.add(mesh);}
@@ -75,6 +81,10 @@ export class AssemblyStage {
   }
   layout(gap){
     this.gap=gap;
+    if(this.joint){
+      for(const p of this.parts){const i=this.joint.instances.find(i=>i.id===p.id);if(i)p.group.position.fromArray(i.position.map((v,a)=>v+gap*i.explode[a]));}
+      this.draw();return;
+    }
     // Cells are reading positions, not joint transforms. Same mm scale for all.
     for(const p of this.parts){p.group.position.x=(p.rank%4-1.5)*(230+gap*140);p.group.position.z=(Math.floor(p.rank/4)-1)*(225+gap*140);}
     this.draw();
@@ -83,11 +93,20 @@ export class AssemblyStage {
     cancelAnimationFrame(this.frame);const active=new Set(ids),start=performance.now();
     const from=this.parts.map(p=>p.group.position.y);
     for(const p of this.parts){const chosen=p.id===selected,now=active.has(p.id);p.material.color.set(now||chosen?p.color:'#9da69b');p.material.emissive.set(chosen?'#6e2d0f':now?'#25321b':'#000000');p.label.classList.toggle('selected',chosen);p.label.classList.toggle('active',now);}
+    if(this.joint){for(const p of this.parts){if(p.group.visible){p.material.color.set(p.color);p.label.classList.add('active');}}this.layout(this.gap);return;}
     const duration=animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches?320:0;
     const tick=time=>{const t=duration?Math.min((time-start)/duration,1):1;this.parts.forEach((p,i)=>p.group.position.y=THREE.MathUtils.lerp(from[i],active.has(p.id)?22:0,t*t*(3-2*t)));this.draw();if(t<1)this.frame=requestAnimationFrame(tick);};tick(start);
   }
-  fit(id){
-    const box=new THREE.Box3();this.parts.filter(p=>!id||p.id===id).forEach(p=>box.expandByObject(p.group));
+  fit(id,includeMotion=false){
+    const box=new THREE.Box3();this.parts.filter(p=>p.group.visible&&(!id||p.id===id)).forEach(p=>{
+      const bounds=new THREE.Box3().setFromObject(p.group);box.union(bounds);
+      const instance=includeMotion&&this.joint?.instances.find(i=>i.id===p.id);
+      if(instance){
+        const offset=new THREE.Vector3().fromArray(instance.position).sub(p.group.position);
+        box.union(bounds.clone().translate(offset));
+        box.union(bounds.clone().translate(offset.add(new THREE.Vector3().fromArray(instance.explode))));
+      }
+    });
     const center=box.isEmpty()?new THREE.Vector3():box.getCenter(new THREE.Vector3());
     const extent=box.isEmpty()?400:Math.max(...box.getSize(new THREE.Vector3()).toArray(),40);
     const scale=extent*Math.max(1,1/this.camera.aspect);this.controls.target.copy(center);this.camera.position.copy(center).add(new THREE.Vector3(scale*.7,scale*1.4,scale*1.35));this.controls.update();this.resize();
@@ -95,6 +114,21 @@ export class AssemblyStage {
   resize(){const r=this.host.getBoundingClientRect();if(!r.width||!r.height)return;this.camera.aspect=r.width/r.height;this.camera.updateProjectionMatrix();this.renderer.setSize(r.width,r.height);this.draw();}
   draw(){
     this.renderer.render(this.scene,this.camera);const w=this.host.clientWidth,h=this.host.clientHeight;
-    for(const p of this.parts){const v=new THREE.Vector3(p.group.position.x,p.group.position.y+p.size[2]+14,p.group.position.z).project(this.camera);p.label.style.left=`${(v.x+1)*w/2}px`;p.label.style.top=`${(1-v.y)*h/2}px`;p.label.hidden=v.z>1||v.z< -1||Math.abs(v.x)>1||Math.abs(v.y)>1;}
+    for(const p of this.parts){
+      if(!p.group.visible){p.label.hidden=true;continue;}
+      const anchor=this.joint?new THREE.Box3().setFromObject(p.group).getCenter(new THREE.Vector3()):new THREE.Vector3(p.group.position.x,p.group.position.y+p.size[2]+14,p.group.position.z);
+      if(this.joint)anchor.x+=p.id===this.joint.instances[0].id?-30:30;
+      const v=anchor.project(this.camera);let left=(v.x+1)*w/2;
+      if(this.joint){const margin=p.label.offsetWidth/2+8;left=THREE.MathUtils.clamp(left,margin,w-margin);}
+      p.label.style.left=`${left}px`;p.label.style.top=`${(1-v.y)*h/2}px`;p.label.hidden=v.z>1||v.z< -1||Math.abs(v.x)>1||Math.abs(v.y)>1;
+    }
+  }
+  setJoint(joint){
+    cancelAnimationFrame(this.frame);this.joint=joint;
+    for(const p of this.parts){
+      const instance=joint?.instances.find(i=>i.id===p.id);p.group.visible=!joint||!!instance;
+      p.group.rotation.set(...(instance?instance.rotation.map(x=>x*Math.PI/180):[0,0,0]));p.group.position.y=0;
+    }
+    this.layout(joint?1:.35);this.fit();
   }
 }

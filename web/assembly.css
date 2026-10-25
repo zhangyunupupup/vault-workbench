@@ -3,3 +3,5 @@
 @media(max-width:650px){#assembly-stage{height:420px}.assembly-guide{display:block}.assembly-part-grid{grid-template-columns:1fr}.assembly-label{font-size:9px;max-width:88px}.assembly-inventory{padding:16px}.assembly-inventory-heading{display:block}.assembly-tools{align-items:start}.assembly-tools>div{flex-direction:column;gap:6px}.assembly-presets .outline-button{padding:12px;font-size:11px}.assembly-inventory iframe{height:450px}}
 .assembly-label,.assembly-label:active{transform:translate(-50%,-100%);transition:background .18s,color .18s}
 @media(max-width:650px){.assembly-label:not(.active):not(.selected){display:none}}
+.assembly-joint-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:0 18px 18px}.assembly-joint-controls button{font-size:12px;padding:10px 14px}.assembly-joint-controls p{flex-basis:100%;line-height:1.8}.assembly-joint-controls [hidden],#assembly-disclosure-text[hidden]{display:none}
+.assembly-playback[hidden],#assembly-steps[hidden]{display:none}

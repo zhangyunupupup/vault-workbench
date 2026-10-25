@@ -80,7 +80,7 @@ def assembly(catalog, payload):
     result = {'version': 1, 'title': recipe['title'].replace(' × 1', ''), 'supported': bool(supported),
               'precision_ready': False, 'doc': doc, 'hardware': recipe['hardware'],
               'note': '真实 STL 按步骤分解排布，间距只用于看清零件；不是装配坐标。成对零件保留整份文件布局。',
-              'precision_reason': '尚缺经验证的局部装配基准与接合变换；精确合拢、开盖和抽拉动画暂未开放。',
+              'precision_reason': '整套产品的接合变换仍待核对；整套合拢、开盖和抽拉动画暂未开放。',
               'parts': [], 'steps': []}
     if not supported:
         result['reason'] = '目前步骤演示支持 S3 1F 标准旋钮单抽屉（网格顶盖或无顶盖）和 S3 2F 标准整盖翻盖箱，均不含分隔及改装配件。请使用下方示例或查阅对应手册。'
@@ -110,4 +110,6 @@ def assembly(catalog, payload):
         raise ValidationError('该配置含有未建立步骤映射的零件，请使用模型库和官方手册。')
     if sum(p['faces'] * p['copies'] for p in result['parts']) > 3000000:
         raise ValidationError('当前套件超出三维预览预算，请减少可选连接扣。')
+    from .joints import verified_joint
+    result['joint'] = verified_joint(catalog, result['parts'])
     return result
