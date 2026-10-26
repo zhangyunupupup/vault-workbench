@@ -88,3 +88,25 @@ stage.layout(-1);assert.equal(container.position.z,0);
 stage.setJoint(null);assert.equal(originalMesh.visible,true);assert.equal(previewMesh.visible,false);
 railPair.dispose();cleaned.dispose();for(const p of railPieces)p.geometry.dispose();
 console.log('Body checks passed: X partitions, preview-only support removal, original coordinates unchanged, motion and print geometry restore.');
+
+// Mounted pieces must keep their relative distances and rotations in motion.
+const mounted={instances:[
+  {id:'panel',position:[0,18.5,-72.10002441],rotation:[-90,0,0],explode:[0,0,-50]},
+  {id:'key',position:[0,18.5,-63.69942441],rotation:[-90,0,0],explode:[0,0,-50]},
+  {id:'cap',position:[0,18.5,-99.11645999],rotation:[90,0,0],explode:[0,0,-50]}
+]};
+stage.setJoint(mounted);
+const distances=()=>stage.parts.slice(0,3).map(p=>stage.parts[0].group.position.distanceTo(p.group.position));
+const atOpen=distances();
+for(const gap of [0,.5,1]){
+  stage.layout(gap);
+  distances().forEach((distance,i)=>assert.ok(Math.abs(distance-atOpen[i])<1e-9));
+  for(const p of stage.parts.slice(0,3)){
+    const pose=mounted.instances.find(i=>i.id===p.id);
+    assert.equal(p.group.position.z,pose.position[2]-50*gap);
+    assert.equal(p.group.rotation.x,pose.rotation[0]*Math.PI/180);
+  }
+}
+stage.setJoint(joint);assert.equal(stage.parts[0].group.rotation.x,0);
+stage.setJoint(null);assert.ok(stage.parts.slice(0,3).every(p=>p.group.rotation.x===0));
+console.log('Mounted-panel checks passed: rigid distances, composed rotations, travel and standalone/gallery restore.');

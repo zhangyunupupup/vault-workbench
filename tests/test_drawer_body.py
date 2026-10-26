@@ -17,7 +17,7 @@ class DrawerBodyContracts(unittest.TestCase):
 
     def test_scope_motion_and_print_quantities(self):
         guide = assembly(self.catalog, {'config': {}})
-        body = guide['joints'][0]
+        body = next(p for p in guide['joints'] if p['id'] == 's3-1f-body-runners-v1')
         self.assertEqual(body['id'], 's3-1f-body-runners-v1')
         self.assertEqual(body['motion'], 'drawer')
         self.assertEqual(body['stroke_mm'], 50)
@@ -46,7 +46,7 @@ class DrawerBodyContracts(unittest.TestCase):
 
     def test_exact_partitions_and_preview_support_faces(self):
         guide = assembly(self.catalog, {'config': {}})
-        profile = guide['joints'][0]
+        profile = next(p for p in guide['joints'] if p['id'] == 's3-1f-body-runners-v1')
         parts = {p['id']:p for p in guide['parts']}
         for instance in profile['instances']:
             part = parts[instance['id']]

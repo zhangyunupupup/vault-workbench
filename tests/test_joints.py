@@ -80,7 +80,7 @@ class JointContracts(unittest.TestCase):
             return '0'*64 if Path(path).name == SPRINGS else digest(path, size, mtime)
         with patch('vault.joints.digest', side_effect=changed_spring):
             result = assembly(self.catalog, {'config': {}})
-        self.assertEqual([p['id'] for p in result['joints']], ['s3-1f-body-runners-v1', 's1f-panel-key-cap-v1', 'standard-key-cap-v1'])
+        self.assertEqual([p['id'] for p in result['joints']], ['s3-1f-facade-motion-v1', 's3-1f-body-runners-v1', 's1f-panel-key-cap-v1', 'standard-key-cap-v1'])
 
     def test_measured_seating_plane_and_opening_direction(self):
         bounds = {}
