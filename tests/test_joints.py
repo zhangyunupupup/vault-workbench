@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from vault.catalog import Catalog, DEFAULT_ROOT
 from vault.assembly import assembly
-from vault.joints import KEY, CAP, SIGNATURES, verified_joint
+from vault.joints import KEY, CAP, PANEL, PANEL_SHA256, KEY_PANEL_Y, SIGNATURES, verified_joint, verified_joints
 
 
 @unittest.skipUnless(Path(DEFAULT_ROOT).is_dir(), '本地 VAULT 资料库未连接')
@@ -28,6 +28,28 @@ class JointContracts(unittest.TestCase):
         self.assertIsNone(verified_joint(self.catalog, self.parts[:1]))
         with patch('vault.joints.digest', return_value='0' * 64):
             self.assertIsNone(verified_joint(self.catalog, self.parts))
+
+    def test_panel_profile_is_independent_and_preserves_original_pair(self):
+        guide = assembly(self.catalog, {'config': {}})
+        panel, pair = guide['joints']
+        self.assertEqual(panel['id'], 's1f-panel-key-cap-v1')
+        self.assertEqual(len(panel['instances']), 3)
+        self.assertEqual(pair, guide['joint'])
+        self.assertEqual(pair['instances'][0]['position'], [0, 0, 0])
+        self.assertEqual(panel['instances'][0]['position'], [0, KEY_PANEL_Y, 0])
+        self.assertAlmostEqual(panel['instances'][1]['position'][1]-panel['instances'][0]['position'][1],
+                               pair['instances'][1]['position'][1])
+        self.assertEqual(panel['instances'][2]['sha256'], PANEL_SHA256)
+        self.assertLess(panel['instances'][0]['explode'][1], 0)
+        self.assertFalse(guide['precision_ready'])
+
+    def test_changed_or_missing_panel_falls_back_to_pair_only(self):
+        pair = verified_joint(self.catalog, self.parts)
+        self.assertEqual(verified_joints(self.catalog, self.parts, pair), [pair])
+        all_parts = self.parts + [self.catalog.match(PANEL, kind='drawer').public()]
+        with patch('vault.joints.digest', return_value='0'*64):
+            self.assertEqual(verified_joints(self.catalog, all_parts, pair), [pair])
+        self.assertEqual(verified_joints(self.catalog, all_parts, None), [])
 
     def test_measured_seating_plane_and_opening_direction(self):
         bounds = {}

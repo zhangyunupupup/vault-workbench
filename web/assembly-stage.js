@@ -117,7 +117,7 @@ export class AssemblyStage {
     for(const p of this.parts){
       if(!p.group.visible){p.label.hidden=true;continue;}
       const anchor=this.joint?new THREE.Box3().setFromObject(p.group).getCenter(new THREE.Vector3()):new THREE.Vector3(p.group.position.x,p.group.position.y+p.size[2]+14,p.group.position.z);
-      if(this.joint)anchor.x+=p.id===this.joint.instances[0].id?-30:30;
+      if(this.joint){const instance=this.joint.instances.find(i=>i.id===p.id);anchor.add(new THREE.Vector3().fromArray(instance.label_offset??[p.id===this.joint.instances[0].id?-30:30,0,0]));}
       const v=anchor.project(this.camera);let left=(v.x+1)*w/2;
       if(this.joint){const margin=p.label.offsetWidth/2+8;left=THREE.MathUtils.clamp(left,margin,w-margin);}
       p.label.style.left=`${left}px`;p.label.style.top=`${(1-v.y)*h/2}px`;p.label.hidden=v.z>1||v.z< -1||Math.abs(v.x)>1||Math.abs(v.y)>1;

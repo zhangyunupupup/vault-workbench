@@ -5,3 +5,4 @@
 @media(max-width:650px){.assembly-label:not(.active):not(.selected){display:none}}
 .assembly-joint-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:0 18px 18px}.assembly-joint-controls button{font-size:12px;padding:10px 14px}.assembly-joint-controls p{flex-basis:100%;line-height:1.8}.assembly-joint-controls [hidden],#assembly-disclosure-text[hidden]{display:none}
 .assembly-playback[hidden],#assembly-steps[hidden]{display:none}
+.assembly-joint-controls label{font-size:12px;color:var(--muted)}.assembly-joint-controls select{font:inherit;font-size:12px;max-width:100%;min-width:0;width:auto;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}

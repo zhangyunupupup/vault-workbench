@@ -110,6 +110,7 @@ def assembly(catalog, payload):
         raise ValidationError('该配置含有未建立步骤映射的零件，请使用模型库和官方手册。')
     if sum(p['faces'] * p['copies'] for p in result['parts']) > 3000000:
         raise ValidationError('当前套件超出三维预览预算，请减少可选连接扣。')
-    from .joints import verified_joint
+    from .joints import verified_joint, verified_joints
     result['joint'] = verified_joint(catalog, result['parts'])
+    result['joints'] = verified_joints(catalog, result['parts'], result['joint'])
     return result
