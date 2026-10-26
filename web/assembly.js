@@ -18,20 +18,21 @@ export function initAssembly({api,getConfig,openView}){
   function stop(){clearTimeout(timer);timer=null;$('assembly-play').textContent='播放步骤';$('assembly-play').setAttribute('aria-pressed','false');}
   function jointButton(){const b=$('assembly-joint-play');b.textContent=jointFrame?'暂停动画':jointTarget!==null?(jointTarget===0?'继续合拢':'继续拆开'):+$('assembly-gap').value>0?'播放合拢':'播放拆开';b.setAttribute('aria-pressed',String(!!jointFrame));}
   function stopJoint(reset=true){cancelAnimationFrame(jointFrame);jointFrame=null;if(reset)jointTarget=null;jointButton();}
-  function setGap(value){$('assembly-gap').value=value;$('assembly-gap-value').value=Math.round(value)+'%';stage?.layout(value/100);}
+  function setGap(value){value=Math.max(jointMode?(data?.joint?.min_gap||0):0,Math.min(100,value));$('assembly-gap').value=value;$('assembly-gap-value').value=Math.round(value)+'%';stage?.layout(value/100);}
+  function jointAction(){return data?.joint?.status==='orientation_only'?'查看安装朝向':'查看合拢演示';}
   function toggleJoint(on){
-    if(on&&(!ready||!data?.joint))return;stop();stopJoint();jointMode=on;selected=null;stage?.setJoint(on?data.joint:null);setGap(on?100:35);
-    $('assembly-joint').textContent=on?'返回整套零件':'查看合拢演示';$('assembly-joint-play').hidden=!on;
-    $('assembly-title').textContent=on?data.joint.title+' · 子装配':data.title;
-    $('assembly-status').textContent=on?`当前展示${data.joint.title}；滑块 0% 为合拢位置，100% 为拆开查看。`:data.note;
-    $('assembly-selected').textContent=on?`画布显示${data.joint.instances.length}个零件；选择清单中的其他零件会返回整套分解视图。`:'在画布或下方清单中选择零件；小零件可用“聚焦选中”放大查看。';
+    if(on&&(!ready||!data?.joint))return;stop();stopJoint();jointMode=on;selected=null;$('assembly-gap').min=on?(data.joint.min_gap||0):0;stage?.setJoint(on?data.joint:null);setGap(on?100:35);
+    $('assembly-joint').textContent=on?'返回整套零件':jointAction();$('assembly-joint-play').hidden=!on||data.joint.status==='orientation_only';$('assembly-joint-play').disabled=data.joint.status==='orientation_only';
+    $('assembly-title').textContent=on?data.joint.title+(data.joint.status==='orientation_only'?'':' · 子装配'):data.title;
+    $('assembly-status').textContent=on?(data.joint.status==='orientation_only'?'安装朝向参考：保留安装前距离，弹簧的弹性接合尚待核对。':`当前展示${data.joint.title}；滑块 0% 为合拢位置，100% 为拆开查看。`):data.note;
+    $('assembly-selected').textContent=on?`画布显示${data.joint.instances.reduce((n,i)=>n+(i.components?.length||1),0)}个零件；选择清单中的其他零件会返回整套分解视图。`:'在画布或下方清单中选择零件；小零件可用“聚焦选中”放大查看。';
     host.querySelector('.assembly-guide h2').textContent=on?'子装配说明':'安装步骤';
     for(const el of host.querySelectorAll('.assembly-playback, #assembly-steps, #assembly-playback-note'))el.hidden=on;
     $('assembly-joint-note').textContent=on?(data.joint.instances.length===2?'本视图仅展示旋钮与盖；未做实物压装测试。完整锁定机构仍待核对。':data.joint.note):'仅当本地文件与已核对版本一致时开放子装配。';
     $('assembly-disclosure-text').hidden=on;
-    $('assembly-gap').labels[0].textContent=on?'爆炸程度':'分解间距';
+    $('assembly-gap').min=on?(data.joint.min_gap||0):0;$('assembly-gap').labels[0].textContent=on?(data.joint.status==='orientation_only'?'安装前间距':'爆炸程度'):'分解间距';
     showStep(step);$('assembly-play').disabled=on;$('assembly-prev').disabled=on||step===0;$('assembly-next').disabled=on||step===data.steps.length-1;
-    if(on){$('assembly-instruction').innerHTML=`<span class="eyebrow">SUBASSEMBLY / 数字几何核对</span><h3>${esc(data.joint.title)}</h3>${(data.joint.instructions||[]).map(text=>`<p>${esc(text)}</p>`).join('')}<p>播放中可随时暂停；选择不同子装配时会重新展开。</p>`;$('assembly-step-hardware').innerHTML='<p class="field-description">截面采样未发现相交，尚未经过实物压装测试。实际压装前仍需检查打印公差。</p>';$('assembly-manual').href='/api/docs/2#page=1';$('assembly-manual').textContent='官方抽屉装配手册 · 第 1 页 ↗';}
+    if(on){$('assembly-instruction').innerHTML=`<span class="eyebrow">${data.joint.status==='orientation_only'?'ORIENTATION / 安装朝向参考':'SUBASSEMBLY / 数字几何核对'}</span><h3>${esc(data.joint.title)}</h3>${(data.joint.instructions||[]).map(text=>`<p>${esc(text)}</p>`).join('')}<p>${data.joint.status==='orientation_only'?'弹簧保持未变形状态，合拢播放暂不开放。':'播放中可随时暂停；选择不同子装配时会重新展开。'}</p>`;$('assembly-step-hardware').innerHTML=data.joint.status==='orientation_only'?'<p class="field-description">一份 Springs.stl 含左右两件；拆分仅用于查看，打印清单仍按一份文件计算。请对照官方手册安装。</p>':'<p class="field-description">截面采样未发现相交，尚未经过实物压装测试。实际压装前仍需检查打印公差。</p>';$('assembly-manual').href=`/api/docs/${data.joint.doc||2}#page=${data.joint.page||1}`;$('assembly-manual').textContent=`官方抽屉装配手册 · 第 ${data.joint.page||1} 页 ↗`;}
     if($('assembly-document').open)$('assembly-pdf').src=$('assembly-manual').href;
     jointButton();stage?.fit();
   }
@@ -54,7 +55,7 @@ export function initAssembly({api,getConfig,openView}){
   }
   async function load(config,colors){
     host.querySelector('.assembly-guide h2').textContent='安装步骤';for(const el of host.querySelectorAll('.assembly-playback, #assembly-steps, #assembly-playback-note'))el.hidden=false;
-    stop();stopJoint();jointMode=false;$('assembly-joint').disabled=true;$('assembly-joint').textContent='查看合拢演示';$('assembly-joint-select').disabled=true;$('assembly-joint-select').innerHTML='<option>等待模型核对</option>';$('assembly-joint-play').hidden=true;$('assembly-disclosure-text').hidden=false;$('assembly-gap').labels[0].textContent='分解间距';$('assembly-joint-note').textContent='仅当本地文件与已核对版本一致时开放子装配。';const seq=++sequence;ready=false;data=null;selected=null;stage?.clear();
+    stop();stopJoint();jointMode=false;$('assembly-joint').disabled=true;$('assembly-joint').textContent='查看合拢演示';$('assembly-joint-select').disabled=true;$('assembly-joint-select').innerHTML='<option>等待模型核对</option>';$('assembly-joint-play').hidden=true;$('assembly-disclosure-text').hidden=false;$('assembly-gap').min=0;$('assembly-gap').labels[0].textContent='分解间距';$('assembly-joint-note').textContent='仅当本地文件与已核对版本一致时开放子装配。';const seq=++sequence;ready=false;data=null;selected=null;stage?.clear();
     $('assembly-stage').classList.remove('failed');$('assembly-fallback').hidden=false;$('assembly-fallback').textContent='正在核对型号与本地文件…';
     $('assembly-status').textContent='正在核对配置…';$('assembly-title').textContent='零件分解';
     for(const id of ['assembly-play','assembly-prev','assembly-next','assembly-gap','assembly-focus'])$(id).disabled=true;
@@ -72,7 +73,7 @@ export function initAssembly({api,getConfig,openView}){
         if(!stage){const {AssemblyStage}=await import('/assembly-stage.js');if(seq!==sequence)return;stage=new AssemblyStage($('assembly-stage'),choose,message=>{ready=false;stop();stopJoint();if(jointMode)toggleJoint(false);$('assembly-joint').disabled=true;$('assembly-joint-select').disabled=true;$('assembly-gap').disabled=true;$('assembly-focus').disabled=true;$('assembly-status').textContent=message;});}
         const complete=await stage.load(data.parts,(n,total)=>{if(seq===sequence)$('assembly-fallback').textContent=`读取本地模型 ${n} / ${total}…`;},{instances:data.joints.flatMap(p=>p.instances)});
         if(seq!==sequence||!complete)return;
-        ready=true;$('assembly-joint').disabled=!data.joint;$('assembly-joint-select').disabled=!data.joint;$('assembly-fallback').hidden=true;$('assembly-gap').disabled=false;stage.layout(+$('assembly-gap').value/100);stage.fit();highlight();
+        ready=true;$('assembly-joint').textContent=jointAction();$('assembly-joint').disabled=!data.joint;$('assembly-joint-select').disabled=!data.joint;$('assembly-fallback').hidden=true;$('assembly-gap').disabled=false;stage.layout(+$('assembly-gap').value/100);stage.fit();highlight();
       }catch(e){if(seq!==sequence)return;$('assembly-stage').classList.add('failed');$('assembly-fallback').textContent='三维预览不可用：'+e.message+' 仍可使用右侧步骤与手册。';$('assembly-status').textContent='真实几何加载未完成，未显示不完整装配。可重新选择示例重试。';}
     }catch(e){if(seq!==sequence)return;$('assembly-status').textContent=e.message;$('assembly-fallback').textContent='无法加载。请检查模型库连接后重新选择。';}
   }
@@ -90,7 +91,7 @@ export function initAssembly({api,getConfig,openView}){
   $('assembly-joint').onclick=()=>toggleJoint(!jointMode);
   $('assembly-joint-select').onchange=()=>{if(!ready)return;const profile=data.joints.find(p=>p.id===$('assembly-joint-select').value);if(!profile)return;data.joint=profile;toggleJoint(true);};
   $('assembly-joint-play').onclick=()=>{
-    if(!jointMode||!ready)return;
+    if(!jointMode||!ready||data.joint.status==='orientation_only')return;
     if(jointFrame){stopJoint(false);return;}
     stage?.fit(undefined,true);
     const from=+$('assembly-gap').value,to=jointTarget??(from>0?0:100),start=performance.now();jointTarget=to;

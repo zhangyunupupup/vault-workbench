@@ -11,6 +11,8 @@ KEY = 'Key (Turn On Supports).stl'
 CAP = 'Key Cap.stl'
 PANEL = 'S1F (Turn On Supports).stl'
 PANEL_SHA256 = '7099f6d50adb8bfb6b714799820556fbdc3c9c546e139bb18c46c02f24587709'
+SPRINGS = 'Springs.stl'
+SPRINGS_SHA256 = '55f2736227703b6e37b0e5beb844019f067e6a7732fd7ae7d0dfc95ba73e1a2c'
 KEY_PANEL_Y = -8.4006
 SIGNATURES = {
     KEY: '7953495ea17c6062c4f80233084ba7db1ad3c28b0927f9b20701fb1b0768a7c0',
@@ -77,4 +79,31 @@ def verified_joints(catalog, parts, key_cap):
                          '滑块展示三件的分解关系；实际安装顺序为先穿入旋钮，再安装盖。动画不模拟卡扣变形或压装过程。'],
         'instances': instances,
     })
+    springs = next((p for p in parts if p['name'] == SPRINGS), None)
+    if springs is not None:
+        path = catalog.resolve(springs['id'])
+        stat = path.stat()
+        if digest(str(path), stat.st_size, stat.st_mtime_ns) == SPRINGS_SHA256:
+            reference = deepcopy(profiles[0])
+            reference.update({
+                'id': 's1f-spring-orientation-v1', 'title': '左右弹簧 · 安装朝向参考',
+                'status': 'orientation_only', 'page': 2, 'view': 'rear', 'min_gap': 40,
+                'note': '弹簧按未变形状态展示，保留安装前距离。弹性接合尚待核对，暂不提供合拢。',
+                'method': '按源文件中心 Y=0 分出两件完整网格；平整面朝向面板背面。自由弹簧与旋钮存在相交，不能用刚体合拢替代弹性压装。',
+                'instructions': ['从背面查看：左右弹簧的卡口分别朝向两侧螺丝柱，平整面朝向面板背面外侧。',
+                                 '此处显示安装前的朝向与对应位置，弹簧保留未变形几何。下压后的弯曲、卡接及旋钮转动尚待核对。'],
+            })
+            for instance in reference['instances']:
+                instance['explode'] = [0, 0, 0]
+            reference['instances'].append({
+                'id': springs['id'], 'sha256': SPRINGS_SHA256,
+                'position': [0, 0, 0], 'rotation': [0, 0, 0], 'explode': [0, 0, 0],
+                'components': [
+                    {'region': 'negative_y', 'faces': 20816, 'title': '左弹簧',
+                     'position': [-38.35, .5951, 19.2951], 'rotation': [0, 180, 0], 'explode': [0, -60, 0]},
+                    {'region': 'positive_y', 'faces': 20484, 'title': '右弹簧',
+                     'position': [38.35, .5951, 19.2951], 'rotation': [0, 0, 0], 'explode': [0, -60, 0]},
+                ],
+            })
+            profiles.insert(1, reference)
     return profiles

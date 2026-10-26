@@ -25,7 +25,8 @@ class Stage {
 }
 const joint={id:'pair',title:'标准旋钮与盖',note:'scope',instances:[{id:'key'},{id:'cap'}]};
 const panelJoint={...joint,id:'panel',title:'前面板、旋钮与盖',instances:[...joint.instances,{id:'panel'}]};
-const guide={supported:true,title:'drawer',note:'gallery',precision_reason:'pending',joint,joints:[panelJoint,joint],
+const reference={...panelJoint,id:'reference',title:'左右弹簧 · 安装朝向参考',status:'orientation_only',min_gap:40,page:2,instances:[...panelJoint.instances,{id:'springs',components:[{},{}]}]};
+const guide={supported:true,title:'drawer',note:'gallery',precision_reason:'pending',joint,joints:[panelJoint,reference,joint],
   parts:[{id:'key',copies:1},{id:'cap',copies:1},{id:'panel',copies:1}],hardware:[],
   steps:[{title:'first',parts:['key'],hardware:[],doc:2,page:1},{title:'second',parts:['cap'],hardware:[],doc:2,page:2}]};
 const context=vm.createContext({document:{getElementById:element,querySelectorAll:()=>[],addEventListener(){}},
@@ -74,10 +75,23 @@ assert.equal(element('assembly-joint-play').textContent,'播放合拢');
 reduced=true;element('assembly-joint-play').onclick();
 assert.equal(element('assembly-gap').value,0);
 assert.equal(frames.size,0);
+element('assembly-joint-select').value='reference';element('assembly-joint-select').onchange();
+assert.equal(element('assembly-joint-play').hidden,true);
+assert.equal(element('assembly-joint-play').disabled,true);
+assert.equal(element('assembly-gap').min,40);
+element('assembly-gap').value=0;element('assembly-gap').oninput();
+assert.equal(element('assembly-gap').value,40);
+element('assembly-joint-play').onclick();assert.equal(frames.size,0);
+assert.equal(element('assembly-gap').value,40);
+assert.equal(element('assembly-manual').href,'/api/docs/2#page=2');
 element('assembly-joint').onclick();
+assert.equal(element('assembly-gap').min,0);
+assert.equal(element('assembly-gap').value,35);
 assert.equal(element('assembly-steps').hidden,false);
 assert.equal(element('assembly-play').disabled,false);
 element('assembly-joint').onclick();
+element('assembly-joint-select').value='panel';element('assembly-joint-select').onchange();
+assert.equal(element('assembly-joint-play').disabled,false);
 Stage.current.clear();Stage.current.onError('context lost');
 assert.equal(element('assembly-steps').hidden,false);
 assert.equal(element('assembly-joint').disabled,true);

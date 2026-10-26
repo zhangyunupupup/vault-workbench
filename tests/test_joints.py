@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from vault.catalog import Catalog, DEFAULT_ROOT
 from vault.assembly import assembly
-from vault.joints import KEY, CAP, PANEL, PANEL_SHA256, KEY_PANEL_Y, SIGNATURES, verified_joint, verified_joints
+from vault.joints import KEY, CAP, PANEL, PANEL_SHA256, KEY_PANEL_Y, SPRINGS, SPRINGS_SHA256, SIGNATURES, verified_joint, verified_joints
 
 
 @unittest.skipUnless(Path(DEFAULT_ROOT).is_dir(), '本地 VAULT 资料库未连接')
@@ -31,7 +31,7 @@ class JointContracts(unittest.TestCase):
 
     def test_panel_profile_is_independent_and_preserves_original_pair(self):
         guide = assembly(self.catalog, {'config': {}})
-        panel, pair = guide['joints']
+        panel, _, pair = guide['joints']
         self.assertEqual(panel['id'], 's1f-panel-key-cap-v1')
         self.assertEqual(len(panel['instances']), 3)
         self.assertEqual(pair, guide['joint'])
@@ -50,6 +50,36 @@ class JointContracts(unittest.TestCase):
         with patch('vault.joints.digest', return_value='0'*64):
             self.assertEqual(verified_joints(self.catalog, all_parts, pair), [pair])
         self.assertEqual(verified_joints(self.catalog, all_parts, None), [])
+
+    def test_spring_reference_has_complete_regions_and_never_certifies_closure(self):
+        guide = assembly(self.catalog, {'config': {}})
+        reference = guide['joints'][1]
+        self.assertEqual(reference['status'], 'orientation_only')
+        self.assertGreaterEqual(reference['min_gap'], 40)
+        self.assertEqual(reference['page'], 2)
+        spring = reference['instances'][-1]
+        self.assertEqual(spring['sha256'], SPRINGS_SHA256)
+        part = next(p for p in guide['parts'] if p['name'] == SPRINGS)
+        self.assertEqual(part['copies'], 1)
+        self.assertEqual(sum(c['faces'] for c in spring['components']), part['faces'])
+        self.assertEqual({c['region'] for c in spring['components']}, {'negative_y', 'positive_y'})
+        # At the closest allowed view position, both unbent springs stay wholly
+        # behind the key's rear-most point. This is not a nominal seated pose.
+        mesh = list(struct.iter_unpack('<12fH', self.catalog.resolve(part['id']).read_bytes()[84:]))
+        height = max(v[a] for v in mesh for a in (5,8,11))-min(v[a] for v in mesh for a in (5,8,11))
+        key = reference['instances'][0]
+        for component in spring['components']:
+            front = component['position'][1] + component['explode'][1]*reference['min_gap']/100 + height
+            self.assertLess(front, key['position'][1])
+
+    def test_spring_version_change_removes_only_orientation_reference(self):
+        guide = assembly(self.catalog, {'config': {}})
+        from vault.joints import digest
+        def changed_spring(path, size, mtime):
+            return '0'*64 if Path(path).name == SPRINGS else digest(path, size, mtime)
+        with patch('vault.joints.digest', side_effect=changed_spring):
+            result = assembly(self.catalog, {'config': {}})
+        self.assertEqual([p['id'] for p in result['joints']], ['s1f-panel-key-cap-v1', 'standard-key-cap-v1'])
 
     def test_measured_seating_plane_and_opening_direction(self):
         bounds = {}

@@ -10,7 +10,7 @@ from pathlib import Path
 import sys
 
 import numpy as np
-from shapely import LineString, polygonize, unary_union
+from shapely import LineString, polygonize_full, unary_union
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from vault.catalog import Catalog, DEFAULT_ROOT
@@ -32,7 +32,13 @@ def triangles(path):
 
 
 def section(mesh, z):
+    # A cut exactly through vertices can drop an entire boundary under the
+    # half-open edge rule. Move a tiny amount (1e-6 mm) off that plane.
+    if np.any(abs(mesh[:, :, 2]-z) < 1e-9):
+        z += .000001
     mesh = mesh[(mesh[:, :, 2].min(1) < z) & (mesh[:, :, 2].max(1) > z)]
+    if not len(mesh):
+        return unary_union([])
     points = np.full((len(mesh), 3, 2), np.nan)
     for edge, (a, b) in enumerate(((0, 1), (1, 2), (2, 0))):
         v, w = mesh[:, a], mesh[:, b]
@@ -41,11 +47,16 @@ def section(mesh, z):
         points[crossing, edge] = v[crossing, :2] + t[:, None]*(w[crossing, :2]-v[crossing, :2])
     segments = points[np.isfinite(points[:, :, 0])].reshape(-1, 2, 2).round(4)
     lines = [LineString(s) for s in segments if np.linalg.norm(s[0]-s[1]) > 1e-5]
-    polygons = polygonize(lines).geoms
+    # Node crossings/T-junctions before polygonizing. Otherwise a real cavity
+    # can disappear or a valid section can be returned as empty.
+    noded = unary_union(lines)
+    polygons, cuts, dangles, invalid = polygonize_full(list(noded.geoms) if hasattr(noded, 'geoms') else [noded])
+    if cuts.length+dangles.length+invalid.length > .005:
+        raise ValueError(f'Unclosed section at {z:g} mm; cannot certify empty space')
     # Odd/even crossings preserve cavities instead of filling inner rings.
     inside = []
     a, b = segments[:, 0], segments[:, 1]
-    for polygon in polygons:
+    for polygon in polygons.geoms:
         x, y = polygon.representative_point().coords[0]
         crossing = (a[:, 1] > y) != (b[:, 1] > y)
         hits = a[crossing, 0] + (y-a[crossing, 1])*(b[crossing, 0]-a[crossing, 0])/(b[crossing, 1]-a[crossing, 1])
