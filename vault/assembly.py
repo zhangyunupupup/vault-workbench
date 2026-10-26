@@ -113,4 +113,6 @@ def assembly(catalog, payload):
     from .joints import verified_joint, verified_joints
     result['joint'] = verified_joint(catalog, result['parts'])
     result['joints'] = verified_joints(catalog, result['parts'], result['joint'])
+    from .drawer_body import body_joints
+    result['joints'] = body_joints(catalog, result['parts']) + result['joints']
     return result

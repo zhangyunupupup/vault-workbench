@@ -20,30 +20,43 @@ export function readSTL(buffer) {
   return {geometry,size:max.map((v,i)=>v-min[i])};
 }
 
-// Only used after the exact Springs.stl hash is verified. Keep the full-file
-// origin; the measured component poses depend on it. No triangles are cut.
+function copyFaces(geometry,indices){
+  const positions=geometry.attributes.position.array,normals=geometry.attributes.normal.array,points=new Float32Array(indices.length*9),normal=new Float32Array(indices.length*9);
+  indices.forEach((source,n)=>{points.set(positions.subarray(source,source+9),n*9);normal.set(normals.subarray(source,source+9),n*9);});
+  const result=new THREE.BufferGeometry();result.setAttribute('position',new THREE.BufferAttribute(points,3));result.setAttribute('normal',new THREE.BufferAttribute(normal,3));result.computeBoundingBox();result.computeBoundingSphere();return result;
+}
+
+// Used only for exact hash-verified files. Keep the full-file origin and every
+// triangle; source X separates runners, source Y separates the springs.
 export function splitSpringGeometry(geometry,regions){
-  const positions=geometry.attributes.position.array,normals=geometry.attributes.normal.array;
-  const indices={negative_y:[],positive_y:[]};
+  const positions=geometry.attributes.position.array,axis=regions.every(r=>r.region.endsWith('_x'))?'x':'y';
+  const indices=axis==='x'?{negative_x:[],positive_x:[]}:{negative_y:[],positive_y:[]};
   for(let i=0;i<positions.length;i+=9){
-    const z=[positions[i+2],positions[i+5],positions[i+8]];
-    const region=z.every(v=>v>0)?'negative_y':z.every(v=>v<0)?'positive_y':null;
-    if(!region)throw Error('弹簧分件边界不符合已核对版本，未切割或丢弃三角形。');
+    const offset=axis==='x'?0:2,z=[positions[i+offset],positions[i+3+offset],positions[i+6+offset]];
+    const sign=z.every(v=>v>0)?(axis==='x'?'positive':'negative'):z.every(v=>v<0)?(axis==='x'?'negative':'positive'):null;
+    const region=sign?sign+'_'+axis:null;
+    if(!region)throw Error('成对零件的分界不符合已核对版本，未切割或丢弃三角形。');
     indices[region].push(i);
   }
-  if(regions.length!==2||new Set(regions.map(r=>r.region)).size!==2||regions.some(r=>!indices[r.region]||indices[r.region].length!==r.faces))throw Error('弹簧分件面数不符合已核对版本。');
-  return regions.map(region=>{
-    const points=new Float32Array(region.faces*9),normal=new Float32Array(region.faces*9);
-    indices[region.region].forEach((source,n)=>{points.set(positions.subarray(source,source+9),n*9);normal.set(normals.subarray(source,source+9),n*9);});
-    const result=new THREE.BufferGeometry();result.setAttribute('position',new THREE.BufferAttribute(points,3));result.setAttribute('normal',new THREE.BufferAttribute(normal,3));result.computeBoundingBox();result.computeBoundingSphere();
-    return {region:region.region,geometry:result};
-  });
+  if(regions.length!==2||new Set(regions.map(r=>r.region)).size!==2||regions.some(r=>!indices[r.region]||indices[r.region].length!==r.faces))throw Error('成对零件面数不符合已核对版本。');
+  return regions.map(region=>({region:region.region,geometry:copyFaces(geometry,indices[region.region])}));
 }
+
+export function supportRemovedGeometry(geometry,description){
+  const points=geometry.attributes.position.array,keep=[];
+  for(let i=0;i<points.length;i+=9){
+    const remove=description.remove_boxes.some(box=>[0,3,6].every(v=>[0,1,2].every(a=>points[i+v+a]>=box.min[a]&&points[i+v+a]<=box.max[a])));
+    if(!remove)keep.push(i);
+  }
+  if(points.length/9-keep.length!==description.removed_faces)throw Error('辅助支撑区域与已核对版本不一致。');
+  return copyFaces(geometry,keep);
+}
+
+function activeMeshes(part){return part.activeComponents?part.components.filter(c=>c.group.visible).flatMap(c=>c.group.children):part.activeVariant?[part.variantMesh]:part.galleryMeshes;}
 
 function partBounds(part){
   const box=new THREE.Box3();
-  if(part.activeComponents){for(const c of part.components)if(c.group.visible)box.expandByObject(c.group);}
-  else for(const mesh of part.galleryMeshes)box.expandByObject(mesh);
+  for(const mesh of activeMeshes(part))box.expandByObject(mesh);
   return box;
 }
 
@@ -65,7 +78,7 @@ export class AssemblyStage {
     this.renderer.domElement.addEventListener('pointerup',e=>{
       if(e.button!==0||!this.down||Math.hypot(e.clientX-this.down[0],e.clientY-this.down[1])>5)return;
       const r=this.renderer.domElement.getBoundingClientRect();this.pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);
-      const targets=this.parts.filter(p=>p.group.visible).flatMap(p=>p.activeComponents?p.components.filter(c=>c.group.visible).flatMap(c=>c.group.children):p.galleryMeshes.filter(m=>m.visible));
+      const targets=this.parts.filter(p=>p.group.visible&&p.material.opacity>=.5).flatMap(p=>activeMeshes(p).filter(m=>m.visible));
       this.ray.setFromCamera(this.pointer,this.camera);const hit=this.ray.intersectObjects(targets,false)[0];
       if(hit)this.onSelect(hit.object.userData.id);
     });
@@ -75,7 +88,7 @@ export class AssemblyStage {
   }
   clear(){
     this.epoch++;this.abort?.abort();cancelAnimationFrame(this.frame);
-    for(const p of this.parts){this.scene.remove(p.group);p.geometry.dispose();p.material.dispose();p.label.remove();for(const c of p.components){c.geometry.dispose();c.label.remove();}}
+    for(const p of this.parts){this.scene.remove(p.group);p.geometry.dispose();p.variantMesh?.geometry.dispose();p.material.dispose();p.label.remove();for(const c of p.components){c.geometry.dispose();c.label.remove();}}
     this.parts=[];this.joint=null;this.draw();
   }
   async load(parts,onProgress,joint=null){
@@ -96,20 +109,23 @@ export class AssemblyStage {
         }
         const {geometry,size}=readSTL(buffer);
         const regions=joint?.instances.find(i=>i.id===part.id&&i.components)?.components;
-        let pieces;
-        try{pieces=regions?splitSpringGeometry(geometry,regions):[];}catch(e){geometry.dispose();throw e;}
+        const variant=joint?.instances.find(i=>i.id===part.id&&i.variant)?.variant;
+        let pieces,variantGeometry;
+        try{pieces=regions?splitSpringGeometry(geometry,regions):[];variantGeometry=variant?supportRemovedGeometry(geometry,variant):null;}catch(e){geometry.dispose();for(const piece of pieces||[])piece.geometry.dispose();throw e;}
         const group=new THREE.Group(),material=new THREE.MeshStandardMaterial({color:part.color,roughness:.66,metalness:.04,side:THREE.DoubleSide});
         for(let c=0;c<part.copies;c++){const mesh=new THREE.Mesh(geometry,material);mesh.userData.id=part.id;mesh.position.x=(c-(part.copies-1)/2)*(size[0]+12);group.add(mesh);}
         const label=document.createElement('button');label.className='assembly-label';label.type='button';label.textContent=`${rank+1} · ${part.title}`;
         label.onclick=()=>this.onSelect(part.id);this.host.append(label);
         const galleryMeshes=[...group.children];
+        const variantMesh=variantGeometry?new THREE.Mesh(variantGeometry,material):null;
+        if(variantMesh){variantMesh.visible=false;variantMesh.userData.id=part.id;group.add(variantMesh);}
         const components=pieces.map(piece=>{
           const child=new THREE.Group(),mesh=new THREE.Mesh(piece.geometry,material);mesh.userData.id=part.id;child.add(mesh);child.visible=false;group.add(child);
           const componentLabel=document.createElement('button');componentLabel.type='button';componentLabel.className='assembly-label';componentLabel.hidden=true;
           const description=regions.find(r=>r.region===piece.region);componentLabel.textContent=`${rank+1} · ${description.title}`;componentLabel.onclick=()=>this.onSelect(part.id);this.host.append(componentLabel);
           return {...piece,group:child,label:componentLabel};
         });
-        this.parts.push({id:part.id,rank,group,geometry,material,label,size,color:part.color,copies:part.copies,galleryMeshes,components,activeComponents:false});this.scene.add(group);
+        this.parts.push({id:part.id,rank,group,geometry,material,label,size,color:part.color,copies:part.copies,galleryMeshes,components,activeComponents:false,variantMesh,activeVariant:false});this.scene.add(group);
         this.layout(this.gap??.35);onProgress(++completed,parts.length);this.fit();
         // Yield between complete files so selection and cancellation stay responsive.
         await new Promise(resolve=>setTimeout(resolve,0));
@@ -119,7 +135,7 @@ export class AssemblyStage {
     catch(e){if(epoch!==this.epoch)return false;this.clear();throw e;}
   }
   layout(gap){
-    gap=Math.max(gap,(this.joint?.min_gap||0)/100);
+    gap=Math.min(1,Math.max(gap,(this.joint?.min_gap||0)/100));
     this.gap=gap;
     if(this.joint){
       for(const p of this.parts){const i=this.joint.instances.find(i=>i.id===p.id);if(i){p.group.position.fromArray(i.position.map((v,a)=>v+gap*i.explode[a]));for(const c of p.components){const pose=i.components?.find(r=>r.region===c.region);if(pose)c.group.position.fromArray(pose.position.map((v,a)=>v+gap*pose.explode[a]));}}}
@@ -151,7 +167,8 @@ export class AssemblyStage {
     const center=box.isEmpty()?new THREE.Vector3():box.getCenter(new THREE.Vector3());
     const extent=box.isEmpty()?400:Math.max(...box.getSize(new THREE.Vector3()).toArray(),40);
     const rear=this.joint?.view==='rear'?-1:1;
-    const scale=extent*Math.max(1,1/this.camera.aspect);this.controls.target.copy(center);this.camera.position.copy(center).add(new THREE.Vector3(scale*.7,rear*scale*1.4,rear*scale*1.35));this.controls.update();this.resize();
+    const depth=this.joint?.view==='drawer_front'?-1:rear;
+    const scale=extent*Math.max(1,1/this.camera.aspect);this.controls.target.copy(center);this.camera.position.copy(center).add(new THREE.Vector3(scale*.7,rear*scale*1.4,depth*scale*1.35));this.controls.update();this.resize();
   }
   resize(){const r=this.host.getBoundingClientRect();if(!r.width||!r.height)return;this.camera.aspect=r.width/r.height;this.camera.updateProjectionMatrix();this.renderer.setSize(r.width,r.height);this.draw();}
   draw(){
@@ -187,7 +204,9 @@ export class AssemblyStage {
       const instance=joint?.instances.find(i=>i.id===p.id);p.group.visible=!joint||!!instance;
       p.group.rotation.set(...(instance?instance.rotation.map(x=>x*Math.PI/180):[0,0,0]));p.group.position.y=0;
       p.activeComponents=!!instance?.components;
-      for(const mesh of p.galleryMeshes)mesh.visible=!p.activeComponents;
+      p.activeVariant=!!instance?.variant&&!!p.variantMesh;if(p.variantMesh)p.variantMesh.visible=p.activeVariant;
+      if(p.material){const transparent=joint?.transparent_ids?.includes(p.id)||false;p.material.transparent=transparent;p.material.opacity=transparent?0.22:1;p.material.depthWrite=!transparent;}
+      for(const mesh of p.galleryMeshes)mesh.visible=!p.activeComponents&&!p.activeVariant;
       for(const c of p.components){const pose=instance?.components?.find(r=>r.region===c.region);c.group.visible=!!pose;c.group.rotation.set(...(pose?pose.rotation.map(x=>x*Math.PI/180):[0,0,0]));}
     }
     this.layout(joint?1:.35);this.fit();

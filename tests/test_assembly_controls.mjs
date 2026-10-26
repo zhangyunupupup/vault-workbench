@@ -26,7 +26,8 @@ class Stage {
 const joint={id:'pair',title:'标准旋钮与盖',note:'scope',instances:[{id:'key'},{id:'cap'}]};
 const panelJoint={...joint,id:'panel',title:'前面板、旋钮与盖',instances:[...joint.instances,{id:'panel'}]};
 const reference={...panelJoint,id:'reference',title:'左右弹簧 · 安装朝向参考',status:'orientation_only',min_gap:40,page:2,instances:[...panelJoint.instances,{id:'springs',components:[{},{}]}]};
-const guide={supported:true,title:'drawer',note:'gallery',precision_reason:'pending',joint,joints:[panelJoint,reference,joint],
+const bodyMotion={...panelJoint,id:'body',motion:'drawer',stroke_mm:50,status:'geometry_checked',page:7};
+const guide={supported:true,title:'drawer',note:'gallery',precision_reason:'pending',joint,joints:[panelJoint,reference,joint,bodyMotion],
   parts:[{id:'key',copies:1},{id:'cap',copies:1},{id:'panel',copies:1}],hardware:[],
   steps:[{title:'first',parts:['key'],hardware:[],doc:2,page:1},{title:'second',parts:['cap'],hardware:[],doc:2,page:2}]};
 const context=vm.createContext({document:{getElementById:element,querySelectorAll:()=>[],addEventListener(){}},
@@ -96,6 +97,14 @@ Stage.current.clear();Stage.current.onError('context lost');
 assert.equal(element('assembly-steps').hidden,false);
 assert.equal(element('assembly-joint').disabled,true);
 assert.equal(element('assembly-play').disabled,false);
+await element('assembly-drawer').onclick();
+element('assembly-joint-select').value='body';element('assembly-joint-select').onchange();
+assert.equal(element('assembly-gap-value').value,'50 mm');
+assert.equal(element('assembly-joint-play').textContent,'播放推回');
+element('assembly-joint-play').onclick();
+assert.equal(element('assembly-gap-value').value,'0 mm');
+assert.equal(element('assembly-joint-play').textContent,'播放抽出');
+assert.equal(element('assembly-manual').href,'/api/docs/2#page=7');
 await element('assembly-case').onclick();
 assert.equal(element('assembly-joint').disabled,true);
 assert.equal(element('assembly-joint-select').disabled,true);

@@ -31,7 +31,8 @@ class JointContracts(unittest.TestCase):
 
     def test_panel_profile_is_independent_and_preserves_original_pair(self):
         guide = assembly(self.catalog, {'config': {}})
-        panel, _, pair = guide['joints']
+        panel = next(p for p in guide['joints'] if p['id'] == 's1f-panel-key-cap-v1')
+        pair = guide['joint']
         self.assertEqual(panel['id'], 's1f-panel-key-cap-v1')
         self.assertEqual(len(panel['instances']), 3)
         self.assertEqual(pair, guide['joint'])
@@ -53,7 +54,7 @@ class JointContracts(unittest.TestCase):
 
     def test_spring_reference_has_complete_regions_and_never_certifies_closure(self):
         guide = assembly(self.catalog, {'config': {}})
-        reference = guide['joints'][1]
+        reference = next(p for p in guide['joints'] if p['status'] == 'orientation_only')
         self.assertEqual(reference['status'], 'orientation_only')
         self.assertGreaterEqual(reference['min_gap'], 40)
         self.assertEqual(reference['page'], 2)
@@ -79,7 +80,7 @@ class JointContracts(unittest.TestCase):
             return '0'*64 if Path(path).name == SPRINGS else digest(path, size, mtime)
         with patch('vault.joints.digest', side_effect=changed_spring):
             result = assembly(self.catalog, {'config': {}})
-        self.assertEqual([p['id'] for p in result['joints']], ['s1f-panel-key-cap-v1', 'standard-key-cap-v1'])
+        self.assertEqual([p['id'] for p in result['joints']], ['s3-1f-body-runners-v1', 's1f-panel-key-cap-v1', 'standard-key-cap-v1'])
 
     def test_measured_seating_plane_and_opening_direction(self):
         bounds = {}
