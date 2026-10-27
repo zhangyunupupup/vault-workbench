@@ -19,7 +19,7 @@ class DrawerFacadeContracts(unittest.TestCase):
 
     def test_composed_scope_and_rigid_motion(self):
         guide = self.guide
-        facade = guide['joints'][0]
+        facade = next(p for p in guide['joints'] if p['id'] == PROFILE_ID)
         self.assertEqual(facade['id'], PROFILE_ID)
         self.assertEqual(len(facade['instances']), 7)
         self.assertEqual(sum(len(i.get('components', [i])) for i in facade['instances']), 9)

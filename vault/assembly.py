@@ -27,7 +27,7 @@ DRAWER_STEPS = [
     ('安装限位块与连接扣', 8, ['Runner Stopper.stl', 'Latch.stl'],
      '内抽完全推入后再装左右限位块。按手册翻转外壳装连接扣。', []),
     ('检查可选顶盖', 10, ['S3 Grid Roof.stl'],
-     '网格顶盖选型参见总说明第 10 页；这一步是配件核对，不代表已验证的顶盖装配动作。', []),
+     '网格顶盖选型见总说明第10页。对齐扣位与方向；参考定位不能代替卡扣压入和实物公差检查。', []),
 ]
 CASE_STEPS = [
     ('组装翻盖锁', 1, ['LOCK HOLDER.stl', 'LOCK INNER PART.stl', 'LOCK OUTER PART 2-4F.stl', '1 SET OF PINS FOR 1 LOCK.stl'],
@@ -37,10 +37,10 @@ CASE_STEPS = [
     ('安装上下铰链', 3, ['S3 Roof.stl', 'S3 2F Module.stl', 'S-M 2-4F Hinge.stl', 'S Hinge Top.stl'],
      '区分箱体与顶盖铰链。S3 上铰链一件，下铰链文件包含两件；按实际孔位核对螺栓。', ['上铰链固定', '下铰链固定']),
     ('连接顶盖和箱体', 4, ['S-M Rods.stl', 'S3 Roof.stl', 'S3 2F Module.stl'],
-     '铰链对齐后从两侧穿入轴。一份轴文件已有两根。精确轴线和开盖动画尚未验证。', []),
+     '铰链对齐后从两侧穿入轴。一份轴文件已有两根。装配视图可查看轴线与开盖参考，安装后仍需检查实际转动间隙。', []),
     ('固定面板并装入标签', 5, ['S2F Facade.stl', 'Label.stl'],
      '将已装好锁的面板固定到箱体，再滑入标签。用 M4 × 20 mm，勿混用锁座的 14 mm 螺栓。', ['前面板固定']),
-    ('检查内部与活动机构', 6, ['S3 2F Module.stl'],
+    ('检查内部与活动机构', 6, ['S3 2F Module.stl', 'S3 Roof.stl', 'LOCK OUTER PART 2-4F.stl'],
      '核对内部辅助支撑，按需清理；当前方案无分隔片。分隔片的安装位置另见第 7 页。检查锁扣及铰链是否顺畅。', []),
 ]
 
@@ -117,4 +117,16 @@ def assembly(catalog, payload):
     from .drawer_facade import facade_joints
     body = body_joints(catalog, result['parts'])
     result['joints'] = facade_joints(body, result['joints']) + body + result['joints']
+    from .compositions import composition_profiles
+    full = composition_profiles(catalog, result['parts'], kind)
+    result['joints'] = full + result['joints']
+    result['coverage_complete'] = bool(full)
+    if full:
+        result['precision_reason'] = '两套基准的装配步骤与全部所选打印文件已建立参考定位。弹性件含变形示意，局部接触/过盈和实物公差未作认证。'
+        result['coverage'] = {'files':len(result['parts']),'entities':full[0]['display_count'],'steps':len(result['steps'])}
+        if kind == 'sustainer':
+            for item in result['hardware']:
+                if item['reason'] == '前面板固定':
+                    item['source'] = '03_Sustainers Assembly.pdf 第5页；S3 2F面板与箱体四孔定位核对'
+                    item['status'] = '数量按四孔核对；安装前复核打印孔径及螺栓长度'
     return result

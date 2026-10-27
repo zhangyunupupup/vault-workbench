@@ -71,7 +71,7 @@ class AssemblyGuideContracts(unittest.TestCase):
         parts = {p['name']: p['copies'] for p in result['parts']}
         self.assertEqual(cfg['quantity'], 5)
         self.assertEqual(parts['Springs.stl'], 1)
-        self.assertEqual(parts['Facade Cap.stl'], 2)
+        self.assertEqual(parts['Facade Cap.stl'], 1)
         self.assertEqual(parts['Runner Stopper.stl'], 2)
 
     def test_variant_gates_do_not_silently_show_a_different_kit(self):

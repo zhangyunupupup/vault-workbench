@@ -1,0 +1,740 @@
+{
+  "version": 1,
+  "ready": true,
+  "files": {
+    "S3 2F Module.stl": {
+      "sha256": "e465a1846e773ae07039a3ac1aa9be14210a86e9d76a202d8b32ee2f2e7429fc",
+      "elements": [
+        {
+          "key": "body",
+          "title": "箱体",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            42.4009
+          ],
+          "step": 2,
+          "explode": [
+            0,
+            0,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 557744
+          }
+        }
+      ]
+    },
+    "S3 Roof.stl": {
+      "sha256": "04ccd816a2bd48cf24835ec206bb0542553fc2e93a0dfaef1212eba7ae2e1b9e",
+      "elements": [
+        {
+          "key": "roof",
+          "title": "顶盖",
+          "matrix": [
+            0.733729864503,
+            0.679441304262,
+            0.0,
+            -0.0,
+            0.0,
+            1.0,
+            0.679441304262,
+            -0.733729864503,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            91.8265
+          ],
+          "step": 2,
+          "explode": [
+            0,
+            0,
+            100
+          ],
+          "selection": {
+            "all": true,
+            "faces": 271880
+          }
+        }
+      ]
+    },
+    "S2F Facade.stl": {
+      "sha256": "8afd27260e0e6b4840a2ff49381a8be10131671bf2f4b2271464614b86122f0a",
+      "elements": [
+        {
+          "key": "facade",
+          "title": "前面板",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            146.20022,
+            44.804
+          ],
+          "step": 1,
+          "explode": [
+            0,
+            45,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 231274
+          }
+        }
+      ]
+    },
+    "LOCK HOLDER.stl": {
+      "sha256": "507b12fdf488a67b5c953b9599c8cbf703948fc65e3c28dba10a073eb5680722",
+      "elements": [
+        {
+          "key": "holder",
+          "title": "翻盖锁座",
+          "matrix": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            -37.25999,
+            165.75062,
+            67.10667
+          ],
+          "step": 0,
+          "explode": [
+            0,
+            140,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 34660
+          }
+        }
+      ]
+    },
+    "LOCK INNER PART.stl": {
+      "sha256": "8bbf85026331314b6fa1921efc723dda773dd26e2bd995bc1ec5d5fe13de10ce",
+      "elements": [
+        {
+          "key": "inner",
+          "title": "锁内扣",
+          "matrix": [
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            19.8,
+            171.5001,
+            62.30447
+          ],
+          "step": 0,
+          "explode": [
+            0,
+            160,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 15920
+          }
+        }
+      ]
+    },
+    "LOCK OUTER PART 2-4F.stl": {
+      "sha256": "38032dab4ad656c8b92a13b1b050c2dc1fd68758a8437a623d4a3f72d43d2396",
+      "elements": [
+        {
+          "key": "outer",
+          "title": "锁外扣（未扣合）",
+          "matrix": [
+            0.0,
+            0.0,
+            -1.0,
+            0.121869343405,
+            0.992546151641,
+            0.0,
+            0.992546151641,
+            -0.121869343405,
+            0.0
+          ],
+          "origin": [
+            24.996925,
+            169.84156002775686,
+            72.48913677378783
+          ],
+          "step": 0,
+          "explode": [
+            0,
+            190,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 59696
+          }
+        }
+      ]
+    },
+    "S-M 2-4F Hinge.stl": {
+      "sha256": "b42137f2cbf34f6faeb78700b0bb508541d6ba006d8619be6a4019403cdbe92b",
+      "elements": [
+        {
+          "key": "hinge_left",
+          "title": "左下铰链",
+          "matrix": [
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            -31.89965,
+            13.23352,
+            58.3001
+          ],
+          "step": 2,
+          "explode": [
+            0,
+            55,
+            0
+          ],
+          "selection": {
+            "connected": 0,
+            "faces": 66194
+          }
+        },
+        {
+          "key": "hinge_right",
+          "title": "右下铰链",
+          "matrix": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            -0.0,
+            1.0,
+            0.0,
+            -0.0
+          ],
+          "origin": [
+            31.89965,
+            13.2334,
+            58.3001
+          ],
+          "step": 2,
+          "explode": [
+            0,
+            55,
+            0
+          ],
+          "selection": {
+            "connected": 1,
+            "faces": 66168
+          }
+        }
+      ]
+    },
+    "S Hinge Top.stl": {
+      "sha256": "d45875d4f47a31a9c4326085399fe1a17f395ba770c8dc5b613c3bf35956e3ef",
+      "elements": [
+        {
+          "key": "hinge_top",
+          "title": "上铰链",
+          "matrix": [
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            31.4192,
+            14.0007,
+            84.8
+          ],
+          "step": 2,
+          "explode": [
+            0,
+            0,
+            -45
+          ],
+          "selection": {
+            "all": true,
+            "faces": 67018
+          }
+        }
+      ]
+    },
+    "S-M Rods.stl": {
+      "sha256": "2b5643bad8a891d001168ca2baf3820efbaa5a645abb819f8608e1b2bf7f194a",
+      "elements": [
+        {
+          "key": "rod_left",
+          "title": "左铰链轴",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            -38.3092,
+            -11.9949,
+            81.0
+          ],
+          "step": 3,
+          "explode": [
+            -90,
+            0,
+            0
+          ],
+          "selection": {
+            "connected": 0,
+            "faces": 18894
+          },
+          "accuracy": "shaft_reference"
+        },
+        {
+          "key": "rod_right",
+          "title": "右铰链轴",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            38.3092,
+            -3.0051,
+            81.0
+          ],
+          "step": 3,
+          "explode": [
+            90,
+            0,
+            0
+          ],
+          "selection": {
+            "connected": 1,
+            "faces": 18842
+          },
+          "accuracy": "shaft_reference"
+        }
+      ]
+    },
+    "1 SET OF PINS FOR 1 LOCK.stl": {
+      "sha256": "8bc4e5c969d404a0c477fe72237dba0df75d851547720764309d2e6b048ee83a",
+      "elements": [
+        {
+          "key": "big_pin0",
+          "title": "左大锁销",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            -4.683,
+            173.37812,
+            52.3052
+          ],
+          "step": 0,
+          "explode": [
+            -45,
+            0,
+            0
+          ],
+          "selection": {
+            "connected": 0,
+            "faces": 3768
+          },
+          "accuracy": "elastic_pin_reference"
+        },
+        {
+          "key": "big_pin1",
+          "title": "右大锁销",
+          "matrix": [
+            -1.0,
+            -0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            4.683,
+            175.84992,
+            52.3052
+          ],
+          "step": 0,
+          "explode": [
+            45,
+            0,
+            0
+          ],
+          "selection": {
+            "connected": 1,
+            "faces": 3768
+          },
+          "accuracy": "elastic_pin_reference"
+        },
+        {
+          "key": "small_pin0",
+          "title": "左小锁销",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            -22.24458,
+            174.86637,
+            67.30654
+          ],
+          "step": 0,
+          "explode": [
+            -45,
+            0,
+            0
+          ],
+          "selection": {
+            "connected": 2,
+            "faces": 4198
+          },
+          "accuracy": "elastic_pin_reference"
+        },
+        {
+          "key": "small_pin1",
+          "title": "右小锁销",
+          "matrix": [
+            -1.0,
+            -0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            22.24458,
+            174.70267,
+            67.30654
+          ],
+          "step": 0,
+          "explode": [
+            45,
+            0,
+            0
+          ],
+          "selection": {
+            "connected": 3,
+            "faces": 4198
+          },
+          "accuracy": "elastic_pin_reference"
+        }
+      ]
+    },
+    "Label.stl": {
+      "sha256": "33113aa7b3be2b55f5b94b3416208f1f019ad11bb70a416814a94afb20b01cf2",
+      "elements": [
+        {
+          "key": "label",
+          "title": "标签片",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            56.25,
+            154.12022,
+            41.2008
+          ],
+          "step": 4,
+          "explode": [
+            60,
+            0,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 18142
+          }
+        }
+      ],
+      "optional": true
+    }
+  },
+  "profiles": [
+    {
+      "status": "reference_assembly",
+      "doc": 3,
+      "page": 4,
+      "view": "front",
+      "xray_names": [
+        "S3 2F Module.stl",
+        "S3 Roof.stl"
+      ],
+      "note": "完整打印件装配参考：轴线与安装孔按模型核对，局部卡扣过盈和弹性销需实物复核。锁扣初始为未扣合位。",
+      "limits": "参考定位与机构展示，不是实物装配或承载认证。局部接触/过盈已记录；弹性锁销的压缩与卡扣预紧不作力学仿真。",
+      "instructions": [
+        "本套为S3单锁结构，销文件含四根，下铰链文件含两件，轴文件含两根。",
+        "锁扣初始保留未扣合姿态，开盖时先翻开锁外扣，再围绕铰链轴转动顶盖。",
+        "按旁边步骤安装五金；图中打印件齐全不代表可以省略螺栓。"
+      ],
+      "id": "s3-2f-complete-sequence-v1",
+      "title": "翻盖箱 · 分步安装",
+      "motion": "sequence",
+      "sequence_groups": [
+        {
+          "keys": [
+            "facade",
+            "holder",
+            "inner",
+            "outer",
+            "big_pin0",
+            "big_pin1",
+            "small_pin0",
+            "small_pin1"
+          ],
+          "attach_step": 4,
+          "offset": [
+            0,
+            110,
+            0
+          ]
+        }
+      ],
+      "sequence_rotations": [
+        {
+          "keys": [
+            "roof",
+            "hinge_top"
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "pivot": [
+            0,
+            -7.5,
+            84.8
+          ],
+          "degrees": 90,
+          "from_step": 2,
+          "close_step": 5
+        }
+      ],
+      "step_views": {
+        "2": "back",
+        "3": "back"
+      },
+      "step_notes": {
+        "0": "小销连接锁座与内扣，大销连接内扣与外扣；开口销的弹性压入不模拟受力。",
+        "5": "缓慢合盖并检查实际间隙；锁扣仍为未扣合参考位，预紧与承载需实物检查。"
+      }
+    },
+    {
+      "status": "reference_assembly",
+      "doc": 3,
+      "page": 4,
+      "view": "front",
+      "xray_names": [
+        "S3 2F Module.stl",
+        "S3 Roof.stl"
+      ],
+      "note": "完整打印件装配参考：轴线与安装孔按模型核对，局部卡扣过盈和弹性销需实物复核。锁扣初始为未扣合位。",
+      "limits": "参考定位与机构展示，不是实物装配或承载认证。局部接触/过盈已记录；弹性锁销的压缩与卡扣预紧不作力学仿真。",
+      "instructions": [
+        "本套为S3单锁结构，销文件含四根，下铰链文件含两件，轴文件含两根。",
+        "锁扣初始保留未扣合姿态，开盖时先翻开锁外扣，再围绕铰链轴转动顶盖。",
+        "按旁边步骤安装五金；图中打印件齐全不代表可以省略螺栓。"
+      ],
+      "id": "s3-2f-complete-explode-v1",
+      "title": "翻盖箱 · 整套分解",
+      "motion": "explode"
+    },
+    {
+      "status": "reference_assembly",
+      "doc": 3,
+      "page": 4,
+      "view": "front",
+      "xray_names": [
+        "S3 2F Module.stl",
+        "S3 Roof.stl"
+      ],
+      "note": "完整打印件装配参考：轴线与安装孔按模型核对，局部卡扣过盈和弹性销需实物复核。锁扣初始为未扣合位。",
+      "limits": "参考定位与机构展示，不是实物装配或承载认证。局部接触/过盈已记录；弹性锁销的压缩与卡扣预紧不作力学仿真。",
+      "instructions": [
+        "本套为S3单锁结构，销文件含四根，下铰链文件含两件，轴文件含两根。",
+        "锁扣初始保留未扣合姿态，开盖时先翻开锁外扣，再围绕铰链轴转动顶盖。",
+        "按旁边步骤安装五金；图中打印件齐全不代表可以省略螺栓。"
+      ],
+      "id": "s3-2f-complete-open-v1",
+      "title": "翻盖箱 · 开盖演示",
+      "motion": "hinge",
+      "angle_deg": 110,
+      "angle_start": 0.2,
+      "rotations": [
+        {
+          "keys": [
+            "outer"
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "pivot": [
+            0,
+            171.50107,
+            54.8052
+          ],
+          "degrees": -75,
+          "start": 0,
+          "end": 0.2
+        },
+        {
+          "keys": [
+            "roof",
+            "hinge_top"
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "pivot": [
+            0,
+            -7.5,
+            84.8
+          ],
+          "degrees": 110,
+          "start": 0.2,
+          "end": 1
+        }
+      ]
+    },
+    {
+      "status": "reference_assembly",
+      "doc": 3,
+      "page": 4,
+      "view": "front",
+      "xray_names": [
+        "S3 2F Module.stl",
+        "S3 Roof.stl"
+      ],
+      "note": "完整打印件装配参考：轴线与安装孔按模型核对，局部卡扣过盈和弹性销需实物复核。锁扣初始为未扣合位。",
+      "limits": "参考定位与机构展示，不是实物装配或承载认证。局部接触/过盈已记录；弹性锁销的压缩与卡扣预紧不作力学仿真。",
+      "instructions": [
+        "本套为S3单锁结构，销文件含四根，下铰链文件含两件，轴文件含两根。",
+        "锁扣初始保留未扣合姿态，开盖时先翻开锁外扣，再围绕铰链轴转动顶盖。",
+        "按旁边步骤安装五金；图中打印件齐全不代表可以省略螺栓。"
+      ],
+      "id": "s3-2f-latch-pivot-v1",
+      "title": "翻盖箱 · 锁扣翻转",
+      "motion": "latch",
+      "rotations": [
+        {
+          "keys": [
+            "outer"
+          ],
+          "axis": [
+            1,
+            0,
+            0
+          ],
+          "pivot": [
+            0,
+            171.50107,
+            54.8052
+          ],
+          "degrees": -75,
+          "start": 0,
+          "end": 1
+        }
+      ]
+    }
+  ]
+}

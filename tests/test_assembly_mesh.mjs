@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const source=await readFile(new URL('../web/assembly-stage.js',import.meta.url),'utf8');
-const moduleSource=source.replaceAll("'/assets/vendor/three.module.js'",JSON.stringify(new URL('../web/assets/vendor/three.module.js',import.meta.url).href)).replaceAll("'/assets/vendor/OrbitControls.js'",JSON.stringify(new URL('../web/assets/vendor/OrbitControls.js',import.meta.url).href));
+const moduleSource=source.replaceAll("'/assets/vendor/three.module.js'",JSON.stringify(new URL('../web/assets/vendor/three.module.js',import.meta.url).href)).replaceAll("'/assets/vendor/OrbitControls.js'",JSON.stringify(new URL('../web/assets/vendor/OrbitControls.js',import.meta.url).href)).replaceAll("'/assets/assembly-pose.js'",JSON.stringify(new URL('../web/assets/assembly-pose.js',import.meta.url).href));
 const {readSTL,AssemblyStage,splitSpringGeometry,supportRemovedGeometry}=await import('data:text/javascript;base64,'+Buffer.from(moduleSource).toString('base64'));
 const buffer=new ArrayBuffer(134),view=new DataView(buffer);view.setUint32(80,1,true);
 const points=[10000,20000,30000,10010,20000,30000,10000,20020,30030];

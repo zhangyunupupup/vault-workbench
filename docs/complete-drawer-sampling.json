@@ -1,0 +1,114 @@
+{
+  "kind": "drawer",
+  "source_files": 13,
+  "entities": 17,
+  "checked_entities": 16,
+  "section_axis": "world X",
+  "spacing_mm": 0.5,
+  "planes": 330,
+  "excluded": [
+    {
+      "key": "grid_roof",
+      "reason": "Source has 15 non-manifold edges; closed material section not certified. Placement checked separately with contact planes and seven representative cuts."
+    }
+  ],
+  "closed_pairs_with_intersection": [
+    {
+      "a": "shell",
+      "b": "latch0",
+      "peak_mm2": 2.9793562166320995,
+      "sampled_mm3": 27.84847893666811
+    },
+    {
+      "a": "shell",
+      "b": "stopper0",
+      "peak_mm2": 10.328469956562852,
+      "sampled_mm3": 18.974900346182213
+    },
+    {
+      "a": "shell",
+      "b": "stopper1",
+      "peak_mm2": 10.375635466928486,
+      "sampled_mm3": 18.758055808504324
+    },
+    {
+      "a": "panel",
+      "b": "spring0",
+      "peak_mm2": 5.534466593426061,
+      "sampled_mm3": 5.241857382904566
+    },
+    {
+      "a": "panel",
+      "b": "spring1",
+      "peak_mm2": 5.602175596668158,
+      "sampled_mm3": 5.153541026911145
+    },
+    {
+      "a": "key",
+      "b": "key_cap",
+      "peak_mm2": 0.0002573963784818058,
+      "sampled_mm3": 0.0022853914730569564
+    },
+    {
+      "a": "panel",
+      "b": "key",
+      "peak_mm2": 0.00040187869905470165,
+      "sampled_mm3": 0.0008331073782822133
+    }
+  ],
+  "limits": "Reference geometry only; intersections are reported, not silently removed. Not continuous collision, elastic-force, tolerance, locking preload or physical validation.",
+  "motion": {
+    "positions": 51,
+    "pairs_with_intersection": [
+      {
+        "a": "shell",
+        "b": "latch0",
+        "peak_mm2": 2.9793562166320995,
+        "sampled_mm3": 27.84847893666811,
+        "progress": 0.0
+      },
+      {
+        "a": "shell",
+        "b": "stopper0",
+        "peak_mm2": 10.328469956562852,
+        "sampled_mm3": 18.974900346182213,
+        "progress": 0.0
+      },
+      {
+        "a": "shell",
+        "b": "stopper1",
+        "peak_mm2": 10.375635466928486,
+        "sampled_mm3": 18.758055808504324,
+        "progress": 0.0
+      },
+      {
+        "a": "panel",
+        "b": "spring0",
+        "peak_mm2": 5.534466593426061,
+        "sampled_mm3": 5.241857382904566,
+        "progress": 0.0
+      },
+      {
+        "a": "panel",
+        "b": "spring1",
+        "peak_mm2": 5.602175596668158,
+        "sampled_mm3": 5.153541026911145,
+        "progress": 0.0
+      },
+      {
+        "a": "key",
+        "b": "key_cap",
+        "peak_mm2": 0.0002573963784818058,
+        "sampled_mm3": 0.0022853914730569564,
+        "progress": 0.0
+      },
+      {
+        "a": "panel",
+        "b": "key",
+        "peak_mm2": 0.00040187869905470165,
+        "sampled_mm3": 0.0008331073782822133,
+        "progress": 0.0
+      }
+    ]
+  }
+}

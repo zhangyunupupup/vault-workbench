@@ -1,0 +1,904 @@
+{
+  "version": 1,
+  "ready": true,
+  "files": {
+    "S3 Box 1F.stl": {
+      "sha256": "a91318efa047888a253658eb88cc14b2c70ed151cc42aedd3fb954c911791d6d",
+      "elements": [
+        {
+          "key": "box",
+          "title": "内抽盒",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            0.0,
+            0.2,
+            0.0
+          ],
+          "step": 2,
+          "explode": [
+            0,
+            0,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 294326
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ],
+          "supports": {
+            "id": "side-supports-removed",
+            "remove_boxes": [
+              {
+                "min": [
+                  -66.3985,
+                  13.2156,
+                  -70.7398
+                ],
+                "max": [
+                  -65.8983,
+                  23.7844,
+                  43.8676
+                ]
+              },
+              {
+                "min": [
+                  65.8983,
+                  13.2156,
+                  -70.7398
+                ],
+                "max": [
+                  66.3985,
+                  23.7844,
+                  43.8676
+                ]
+              }
+            ],
+            "removed_faces": 15892
+          }
+        }
+      ]
+    },
+    "x3 Runner Slides.stl": {
+      "sha256": "fc5486b8a346d1f73dec6fa1e028e1bed4b97bd359db55daeca8a8bb8cf9c9bb",
+      "elements": [
+        {
+          "key": "slide0",
+          "title": "左内滑轨",
+          "matrix": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            -73.8797,
+            13.1,
+            8.31103516
+          ],
+          "step": 3,
+          "explode": [
+            0,
+            80,
+            0
+          ],
+          "selection": {
+            "connected": 0,
+            "faces": 93455
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        },
+        {
+          "key": "slide1",
+          "title": "右内滑轨",
+          "matrix": [
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            73.8797,
+            13.1,
+            8.31103516
+          ],
+          "step": 3,
+          "explode": [
+            0,
+            80,
+            0
+          ],
+          "selection": {
+            "connected": 1,
+            "faces": 93276
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        }
+      ]
+    },
+    "x3 Runner Guides.stl": {
+      "sha256": "4234e1189bf4e7044a3992aa37ef269ad12e04cbae9e4c65ffc9549bd7ab797f",
+      "elements": [
+        {
+          "key": "guide0",
+          "title": "左外导轨",
+          "matrix": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            -78.6797,
+            0.15,
+            4.17431640625
+          ],
+          "step": 5,
+          "explode": [
+            0,
+            90,
+            0
+          ],
+          "selection": {
+            "connected": 0,
+            "faces": 50316
+          }
+        },
+        {
+          "key": "guide1",
+          "title": "右外导轨",
+          "matrix": [
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            78.6797,
+            0.15,
+            4.17431640625
+          ],
+          "step": 5,
+          "explode": [
+            0,
+            90,
+            0
+          ],
+          "selection": {
+            "connected": 1,
+            "faces": 50316
+          }
+        }
+      ]
+    },
+    "S3 Module 1F.stl": {
+      "sha256": "af1043b8aba9597358c03b6fffcab1e8d0e4f282e8fa0e6dce5b889bc7ce3ac5",
+      "elements": [
+        {
+          "key": "shell",
+          "title": "外壳",
+          "matrix": [
+            -1.0,
+            0.0,
+            -0.0,
+            -0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            -0.0
+          ],
+          "origin": [
+            0.0,
+            -74.1,
+            18.2955
+          ],
+          "step": 5,
+          "explode": [
+            0,
+            -80,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 546334
+          }
+        }
+      ]
+    },
+    "Key (Turn On Supports).stl": {
+      "sha256": "7953495ea17c6062c4f80233084ba7db1ad3c28b0927f9b20701fb1b0768a7c0",
+      "elements": [
+        {
+          "key": "key",
+          "title": "锁定旋钮",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            63.699424410000006,
+            18.5
+          ],
+          "step": 0,
+          "explode": [
+            0,
+            -30,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 134048
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        }
+      ]
+    },
+    "Key Cap.stl": {
+      "sha256": "c5858b1e62cd00d119c108c246a3a352ba713a94ebd29b521495fea0d8a2c444",
+      "elements": [
+        {
+          "key": "key_cap",
+          "title": "旋钮盖",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            99.11645999,
+            18.5
+          ],
+          "step": 0,
+          "explode": [
+            0,
+            90,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 78774
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        }
+      ]
+    },
+    "S1F (Turn On Supports).stl": {
+      "sha256": "7099f6d50adb8bfb6b714799820556fbdc3c9c546e139bb18c46c02f24587709",
+      "elements": [
+        {
+          "key": "panel",
+          "title": "前面板",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            72.10002441,
+            18.5
+          ],
+          "step": 0,
+          "explode": [
+            0,
+            50,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 438246
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        }
+      ]
+    },
+    "Springs.stl": {
+      "sha256": "55f2736227703b6e37b0e5beb844019f067e6a7732fd7ae7d0dfc95ba73e1a2c",
+      "elements": [
+        {
+          "key": "spring0",
+          "title": "左弹簧 · 变形示意",
+          "matrix": [
+            -1.0,
+            -0.0,
+            0.0,
+            0.0,
+            -0.0,
+            1.0,
+            -0.0,
+            1.0,
+            0.0
+          ],
+          "origin": [
+            -38.35,
+            72.69512441,
+            37.795100000000005
+          ],
+          "step": 1,
+          "explode": [
+            0,
+            -45,
+            0
+          ],
+          "selection": {
+            "connected": 0,
+            "faces": 20816
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ],
+          "accuracy": "deformation_illustration",
+          "deform": {
+            "kind": "spring_compression",
+            "fixed_x": 9,
+            "min_x": -23.73681640625,
+            "amount_mm": 4.1
+          }
+        },
+        {
+          "key": "spring1",
+          "title": "右弹簧 · 变形示意",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            38.35,
+            72.69512441,
+            37.795100000000005
+          ],
+          "step": 1,
+          "explode": [
+            0,
+            -45,
+            0
+          ],
+          "selection": {
+            "connected": 1,
+            "faces": 20484
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ],
+          "accuracy": "deformation_illustration",
+          "deform": {
+            "kind": "spring_compression",
+            "fixed_x": 9,
+            "min_x": -23.73681640625,
+            "amount_mm": 4.1
+          }
+        }
+      ]
+    },
+    "Facade Cap.stl": {
+      "sha256": "d18a84f53da54e33f8b2b9763c26c86893b595bb4af33d2049d23552b5e741e4",
+      "elements": [
+        {
+          "key": "facade_cap0",
+          "title": "面板孔盖",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            -51.4522,
+            78.00002441,
+            18.5
+          ],
+          "step": 4,
+          "explode": [
+            0,
+            35,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 1778
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        },
+        {
+          "key": "facade_cap1",
+          "title": "第二孔盖（无标签时）",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            51.4484,
+            78.00002441,
+            18.5
+          ],
+          "step": 4,
+          "explode": [
+            0,
+            35,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 1778
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        }
+      ],
+      "copies": true
+    },
+    "Label.stl": {
+      "sha256": "33113aa7b3be2b55f5b94b3416208f1f019ad11bb70a416814a94afb20b01cf2",
+      "elements": [
+        {
+          "key": "label",
+          "title": "标签片",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "origin": [
+            56.25,
+            80.02002441,
+            18.5
+          ],
+          "step": 4,
+          "explode": [
+            60,
+            0,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 18142
+          },
+          "travel": [
+            0,
+            50,
+            0
+          ]
+        }
+      ],
+      "optional": true
+    },
+    "Runner Stopper.stl": {
+      "sha256": "7dfa53d56ba9470317e586aba121181b380d26597547f51a6e85742ee9d56a87",
+      "elements": [
+        {
+          "key": "stopper0",
+          "title": "左限位块",
+          "matrix": [
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            -74.21220818,
+            27.4496,
+            18.4991
+          ],
+          "step": 6,
+          "explode": [
+            -35,
+            0,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 12392
+          },
+          "accuracy": "snap_fit_reference"
+        },
+        {
+          "key": "stopper1",
+          "title": "右限位块",
+          "matrix": [
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            1.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            74.21220818,
+            27.4496,
+            18.4991
+          ],
+          "step": 6,
+          "explode": [
+            35,
+            0,
+            0
+          ],
+          "selection": {
+            "all": true,
+            "faces": 12392
+          },
+          "accuracy": "snap_fit_reference"
+        }
+      ],
+      "copies": true
+    },
+    "S3 Grid Roof.stl": {
+      "sha256": "6018e896698fa7507b1c392fa7c0cb1362956c3c254f4fc2029d8036de214d0d",
+      "elements": [
+        {
+          "key": "grid_roof",
+          "title": "网格顶盖",
+          "matrix": [
+            -0.707106781187,
+            -0.707106781187,
+            -0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.707106781187,
+            -0.707106781187,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            71.93436,
+            48.16
+          ],
+          "step": 7,
+          "explode": [
+            0,
+            0,
+            60
+          ],
+          "selection": {
+            "all": true,
+            "faces": 379770
+          },
+          "accuracy": "snap_fit_reference"
+        }
+      ],
+      "optional": true
+    },
+    "Latch.stl": {
+      "sha256": "175d0b22fc698f023c2b3d171a8323b46db862c9a3f5187767aeffa7522710ee",
+      "elements": [
+        {
+          "key": "latch0",
+          "title": "底部连接扣",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            0.0,
+            -17.0,
+            -9.5
+          ],
+          "step": 6,
+          "explode": [
+            0,
+            0,
+            -45
+          ],
+          "selection": {
+            "all": true,
+            "faces": 30762
+          },
+          "accuracy": "snap_fit_reference"
+        },
+        {
+          "key": "latch1",
+          "title": "备用连接扣 1",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            235.0,
+            -17.0,
+            -9.5
+          ],
+          "step": 6,
+          "explode": [
+            0,
+            0,
+            -45
+          ],
+          "selection": {
+            "all": true,
+            "faces": 30762
+          },
+          "accuracy": "spare"
+        },
+        {
+          "key": "latch2",
+          "title": "备用连接扣 2",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            340.0,
+            -17.0,
+            -9.5
+          ],
+          "step": 6,
+          "explode": [
+            0,
+            0,
+            -45
+          ],
+          "selection": {
+            "all": true,
+            "faces": 30762
+          },
+          "accuracy": "spare"
+        },
+        {
+          "key": "latch3",
+          "title": "备用连接扣 3",
+          "matrix": [
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            445.0,
+            -17.0,
+            -9.5
+          ],
+          "step": 6,
+          "explode": [
+            0,
+            0,
+            -45
+          ],
+          "selection": {
+            "all": true,
+            "faces": 30762
+          },
+          "accuracy": "spare"
+        }
+      ],
+      "optional": true,
+      "copies": true
+    }
+  },
+  "profiles": [
+    {
+      "status": "reference_assembly",
+      "doc": 2,
+      "page": 8,
+      "view": "front",
+      "xray_names": [
+        "S3 Module 1F.stl"
+      ],
+      "note": "完整打印件装配参考：弹簧采用压缩形状示意，卡扣接触与实物公差需复核。原始打印文件不变。",
+      "limits": "全流程参考，不是力学仿真或装配认证。弹簧形状未实物标定，卡扣/销的弹性压入不作受力计算；五金按旁边清单实物安装。",
+      "instructions": [
+        "按安装步骤查看本步零件，未来步骤零件暂时隐藏。",
+        "S1F使用标签时，标签替代一侧孔盖；另一侧装1个孔盖。无标签时装2个孔盖。",
+        "所有画布分件仍关联原文件；打印包保留原始支撑和原字节。",
+        "连接扣只有一个底部安装位，多选的连接扣作为备用件在旁边展示。"
+      ],
+      "id": "s3-1f-complete-sequence-v1",
+      "title": "抽屉 · 分步安装",
+      "motion": "sequence",
+      "sequence_groups": [
+        {
+          "keys": [
+            "panel",
+            "key",
+            "key_cap",
+            "spring0",
+            "spring1",
+            "label",
+            "facade_cap0",
+            "facade_cap1"
+          ],
+          "attach_step": 4,
+          "offset": [
+            0,
+            100,
+            0
+          ]
+        }
+      ],
+      "step_views": {
+        "1": "back",
+        "6": "bottom"
+      },
+      "step_notes": {
+        "1": "弹簧按弹性臂压缩作形状示意，不代表实际形变或预压力。实际按手册平整面朝外安装。",
+        "6": "先收回内抽，再装左右限位块。翻转模块查看底部连接扣；卡扣压入需实物核对。"
+      }
+    },
+    {
+      "status": "reference_assembly",
+      "doc": 2,
+      "page": 8,
+      "view": "front",
+      "xray_names": [
+        "S3 Module 1F.stl"
+      ],
+      "note": "完整打印件装配参考：弹簧采用压缩形状示意，卡扣接触与实物公差需复核。原始打印文件不变。",
+      "limits": "全流程参考，不是力学仿真或装配认证。弹簧形状未实物标定，卡扣/销的弹性压入不作受力计算；五金按旁边清单实物安装。",
+      "instructions": [
+        "按安装步骤查看本步零件，未来步骤零件暂时隐藏。",
+        "S1F使用标签时，标签替代一侧孔盖；另一侧装1个孔盖。无标签时装2个孔盖。",
+        "所有画布分件仍关联原文件；打印包保留原始支撑和原字节。",
+        "连接扣只有一个底部安装位，多选的连接扣作为备用件在旁边展示。"
+      ],
+      "id": "s3-1f-complete-explode-v1",
+      "title": "抽屉 · 整套分解",
+      "motion": "explode"
+    },
+    {
+      "status": "reference_assembly",
+      "doc": 2,
+      "page": 8,
+      "view": "front",
+      "xray_names": [
+        "S3 Module 1F.stl"
+      ],
+      "note": "整套抽拉查看范围0–50 mm，弹簧为变形示意；不代表最大行程或锁定力。",
+      "limits": "全流程参考，不是力学仿真或装配认证。弹簧形状未实物标定，卡扣/销的弹性压入不作受力计算；五金按旁边清单实物安装。",
+      "instructions": [
+        "按安装步骤查看本步零件，未来步骤零件暂时隐藏。",
+        "S1F使用标签时，标签替代一侧孔盖；另一侧装1个孔盖。无标签时装2个孔盖。",
+        "所有画布分件仍关联原文件；打印包保留原始支撑和原字节。",
+        "连接扣只有一个底部安装位，多选的连接扣作为备用件在旁边展示。"
+      ],
+      "id": "s3-1f-complete-pull-v1",
+      "title": "抽屉 · 整套抽拉",
+      "motion": "drawer",
+      "stroke_mm": 50
+    }
+  ]
+}
