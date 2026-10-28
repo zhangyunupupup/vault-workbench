@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#23362C"><meta name="description" content="无需模型库，先安排你的VAULT布局与配色，带方案回桌面继续打印。">
+  <title>VAULT · 随手搭</title><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><a class="brand" href="index.html">VAULT<span>随手搭</span></a><span class="edition">布局与配色体验 / 03</span><a href="https://github.com/zhangyunupupup/vault-workbench/releases/latest" target="_blank" rel="noopener">下载桌面版 ↗</a></header>
+  <main>
+    <section class="intro"><div><p class="eyebrow">A LITTLE SPACE, A LOT OF POSSIBILITIES.</p><h1>先搭出，<br><em>你的收纳想法。</em></h1><p>选一个盒子，试几种颜色。把方案带回桌面，再整理真正要打印的文件。</p></div><div class="intro-note"><span class="index">01 / START SMALL</span><p>无需模型库<br>方案留在你的设备</p><span id="offline-status" role="status">正在准备离线资源…</span><button id="install" hidden>添加到主屏幕 ＋</button></div></section>
+    <div class="notice">原创简化外形 · 参考包络。仅体验两个基准型号的布局与配色，不含官方模型、装配动画或打印文件。</div>
+    <div class="workspace">
+      <section class="canvas-panel"><div class="canvas-toolbar"><span id="scene-count">0 个箱体</span><div><button id="mode" aria-pressed="false">旋转视角</button><button id="fit">视角复位</button></div></div><div id="stage"><p id="stage-fallback">正在准备三维画布；也可以用下方列表与坐标编辑。</p></div><div class="canvas-foot"><span>拖动旋转 · 双指缩放</span><span>移动模式：5 mm吸附</span></div></section>
+      <aside class="editor"><div class="section-heading"><span>01 / 添加模块</span><strong>从一个开始</strong></div><div class="add-row"><button class="add-card" id="add-drawer"><span>▱</span><strong>小抽屉 ＋</strong><small>S3 · 1F</small></button><button class="add-card" id="add-case"><span>▰</span><strong>翻盖箱 ＋</strong><small>S3 · 2F</small></button></div><div id="items" aria-label="场景中的箱体"></div>
+        <div class="section-heading"><span>02 / 调整模块</span><strong id="selection">选择一个箱体</strong></div><p id="size" class="muted">点击画布或列表选择。</p><fieldset id="fields" disabled><legend class="sr-only">所选箱体</legend><div class="coordinates"><label>X 左右<input id="pos-0" type="number" min="-10000" max="10000" step=".01"></label><label>Y 前后<input id="pos-1" type="number" min="-10000" max="10000" step=".01"></label><label>Z 离地<input id="pos-2" type="number" min="-10000" max="10000" step=".01"></label></div><button id="position" class="wide">应用坐标 · mm</button><div class="pair"><button id="ground">落到地面</button><button id="copy">复制箱体</button></div><label class="stack-label" for="below">放在另一个箱体上</label><div class="stack"><select id="below"></select><button id="stack">对齐叠放 ↑</button></div><h3>换个颜色，看看。</h3><p class="muted">颜色按零件组预览；一份打印文件统一颜色，材料仍需桌面核对。</p><div id="colors"></div><p class="muted">色板为屏幕参考，不能代替实物色卡。</p><button id="remove" class="danger">移除选中箱体</button></fieldset>
+      </aside>
+    </div>
+    <section class="plan"><div class="section-heading"><span>03 / 带走方案</span><strong>手机上想好，桌面上完成。</strong></div><div class="plan-toolbar"><label class="sr-only" for="name">方案名称</label><input id="name" maxlength="80" value="我的随手搭方案"><button id="undo">撤销</button><button id="redo">重做</button><button id="save" class="primary">保存方案 ↓</button><button id="import">导入方案 ↑</button><input type="file" id="file" accept=".json,application/json" hidden></div><p id="message" role="status" aria-live="polite"></p><div id="checks"></div><ol><li>保存JSON方案，通过你常用的方式传到电脑。</li><li>桌面工作台打开「组合搭建」→「导入方案」。</li><li>连接自己的VAULT资料库，重新核对型号、配件和五金，再按颜色打包STL。</li></ol><p class="muted">演示仅导入这两个基准的标准配置；其他型号或改装请在桌面打开。实际顶盖、嵌合、附件和开合空间未计算，不进行承载认证。</p></section>
+    <footer><span>VAULT 随手搭 / V2.1 · 非 USSA 官方软件</span><a href="../vendor/THREE-LICENSE.txt">三维依赖许可</a><a href="https://github.com/zhangyunupupup/vault-workbench">项目与说明 ↗</a></footer>
+  </main><noscript>请启用JavaScript以编辑布局；桌面源码和便携版可从GitHub Releases下载。</noscript><script type="module" src="app.js"></script>
+</body></html>

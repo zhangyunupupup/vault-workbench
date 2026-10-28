@@ -22,7 +22,11 @@
 
 版本更新请查看 [GitHub Releases](https://github.com/zhangyunupupup/vault-workbench/releases) 或 [更新记录](CHANGELOG.md)。
 
-需要 Python 3.10 或更新版本，以及你自己的 VAULT 模型资料库。
+**Windows免安装版**：从[最新Release](https://github.com/zhangyunupupup/vault-workbench/releases/latest)下载 `VAULT-Workbench-2.1.0-windows-x64.zip`，完整解压到可写目录后双击「启动VAULT工作台.cmd」。内置Python运行环境，支持Windows 10/11 x64；仍需自己的VAULT资料库。不要在ZIP内部直接运行。
+
+**手机先体验**：[打开「VAULT 随手搭」](https://zhangyunupupup.github.io/vault-workbench/assets/demo/index.html)。无需模型库，可做两套基准的简化布局、配色与方案JSON操作；首次联网并显示「离线已就绪」后可离线再访。iPhone可通过Safari分享菜单添加到主屏幕，其他浏览器可使用安装菜单。手机保存的JSON在桌面「组合搭建」导入后重新核对，再导出真实STL。
+
+源码版需要 Python 3.10 或更新版本，以及你自己的 VAULT 模型资料库。
 
 Windows 下双击 **启动VAULT工作台.cmd**，浏览器会自动打开工作台。也可以从项目目录运行：
 
@@ -58,13 +62,14 @@ python -m unittest discover -s tests -v
 node tests/test_assembly_mesh.mjs
 node tests/test_assembly_controls.mjs
 node tests/test_assembly_pose.mjs
+node tests/test_demo.mjs --fixture
 ```
 
 真实资料库相关测试需要 `vault/catalog.py` 中配置的资料路径存在；未连接时会跳过。导出契约测试使用临时目录运行。
 
 截面回归测试与开发检查脚本需要可选的 numpy/shapely；未安装时3项截面测试会跳过，工作台运行不受影响。
 
-运行状态、导出包和临时文件分别保存在 `runtime/`、`exports/`、`tmp/`，已由 Git 忽略。
+运行状态、导出包、临时文件和本地发行包分别保存在 `runtime/`、`exports/`、`tmp/`、`dist/`，已由 Git 忽略。发行包通过 `scripts/build_release.py` 白名单构建，官方运行环境版本与许可见[第三方资源](THIRD_PARTY_NOTICES.md)。
 
 本项目为个人本地工具，非 USSA 官方软件。
 
@@ -108,7 +113,17 @@ S1F使用标签时，标签替代一侧孔盖，仅打印1个孔盖；无标签�
 
 按外壳、内抽、面板与配件配色后，同文件同色合并份数，不同颜色分别建目录。一份STL中的成对零件保持统一颜色。CSV和ZIP均包含颜色，ZIP额外附带组合方案。
 
-预览是简化外形与参考包络，不含提手、底座、轮组和开合空间；同尺寸叠放仍需核对嵌合高度及连接扣。红色碰撞或悬空问题会阻止组合导出，黄色说明未核实条件。整套精确装配动画和免Python便携包尚未实现。详见 [搭建数据依据](docs/builder-evidence.md)。
+预览是简化外形与参考包络，不含提手、底座、轮组和开合空间；同尺寸叠放仍需核对嵌合高度及连接扣。红色碰撞或悬空问题会阻止组合导出，黄色说明未核实条件。两套基准的完整参考装配见上方装配演示，其他规格仍待核对。详见 [搭建数据依据](docs/builder-evidence.md)。
+
+## 随手搭与离线发行（v2.1.0）
+
+随手搭使用原创简化外形，仅开放S3 1F标准单抽屉和S3 2F整盖翻盖箱的布局与配色。支持列表选择、坐标、5 mm拖动吸附、对齐叠放、复制删除、撤销重做、自动保存和JSON导入导出；最多60个箱体。未接入的型号与改装配置会拒绝导入，不会静默改型。
+
+演示使用独立离线缓存，只缓存演示与本地三维依赖，不读取或缓存本地API、STL和PDF。数据保存在当前浏览器，清理网站数据可能删除方案，请用JSON备份。手机不能访问电脑磁盘，桌面服务继续只监听127.0.0.1。
+
+![随手搭布局与配色](output/随手搭桌面截图.png)
+
+Release同时提供Windows x64便携包、静态演示包和SHA256SUMS校验表。静态演示包可部署到HTTPS子目录，直接用file://打开不支持模块与离线安装。验证范围与构建步骤见[离线发行记录](docs/offline-evidence.md)。
 
 ## 型号图片
 

@@ -4,3 +4,4 @@ runtime/
 exports/
 tmp/
 .venv/
+dist/

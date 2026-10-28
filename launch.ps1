@@ -23,6 +23,7 @@ try {
     }
 } catch { }
 $pythonCandidates = @(
+    (Join-Path $projectDir 'python\python.exe'),
     (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python314\python.exe'),
     (Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe')
 )
@@ -42,5 +43,5 @@ if (-not $pythonExecutable) {
 }
 if (-not $pythonExecutable) { throw '未找到可用的 Python 3.10+。安装 Python 后重新双击启动即可。' }
 $env:PYTHONIOENCODING = 'utf-8'
-Start-Process -FilePath $pythonExecutable -ArgumentList @('-u', ('"' + (Join-Path $projectDir 'server.py') + '"'), '--open') -WorkingDirectory $projectDir -WindowStyle Hidden -RedirectStandardOutput (Join-Path $runtimeDir 'server.log') -RedirectStandardError (Join-Path $runtimeDir 'error.log')
+Start-Process -FilePath $pythonExecutable -ArgumentList @('-X', 'utf8', '-u', ('"' + (Join-Path $projectDir 'server.py') + '"'), '--open') -WorkingDirectory $projectDir -WindowStyle Hidden -RedirectStandardOutput (Join-Path $runtimeDir 'server.log') -RedirectStandardError (Join-Path $runtimeDir 'error.log')
 Write-Output 'VAULT 工作台已启动，正在打开浏览器。'
