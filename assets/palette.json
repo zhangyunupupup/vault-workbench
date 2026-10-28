@@ -1,0 +1,157 @@
+{
+  "source": "https://github.com/bambulab/BambuStudio/blob/master/resources/profiles/BBL/filament/filaments_color_codes.json",
+  "checked_on": "2026-10-25",
+  "material": "PLA Basic",
+  "colors": [
+    {
+      "name": "橙色",
+      "code": "10300",
+      "hex": "#FF6A13"
+    },
+    {
+      "name": "南瓜橙",
+      "code": "10301",
+      "hex": "#FF9016"
+    },
+    {
+      "name": "蓝灰",
+      "code": "10602",
+      "hex": "#5B6579"
+    },
+    {
+      "name": "钴蓝色",
+      "code": "10604",
+      "hex": "#0056B8"
+    },
+    {
+      "name": "松石绿",
+      "code": "10605",
+      "hex": "#00B1B7"
+    },
+    {
+      "name": "青色",
+      "code": "10603",
+      "hex": "#0086D6"
+    },
+    {
+      "name": "蓝色",
+      "code": "10601",
+      "hex": "#0A2989"
+    },
+    {
+      "name": "灰色",
+      "code": "10103",
+      "hex": "#8E9089"
+    },
+    {
+      "name": "银色",
+      "code": "10102",
+      "hex": "#A6A9AA"
+    },
+    {
+      "name": "浅灰",
+      "code": "10104",
+      "hex": "#D1D3D5"
+    },
+    {
+      "name": "深灰",
+      "code": "10105",
+      "hex": "#545454"
+    },
+    {
+      "name": "圣诞绿",
+      "code": "10502",
+      "hex": "#3F8E43"
+    },
+    {
+      "name": "苹果绿",
+      "code": "10503",
+      "hex": "#BECF00"
+    },
+    {
+      "name": "拓竹绿",
+      "code": "10501",
+      "hex": "#00AE42"
+    },
+    {
+      "name": "黑色",
+      "code": "10101",
+      "hex": "#000000"
+    },
+    {
+      "name": "棕色",
+      "code": "10800",
+      "hex": "#9D432C"
+    },
+    {
+      "name": "可可棕",
+      "code": "10802",
+      "hex": "#6F5034"
+    },
+    {
+      "name": "杏色",
+      "code": "10201",
+      "hex": "#F7E6DE"
+    },
+    {
+      "name": "粉色",
+      "code": "10203",
+      "hex": "#F55A74"
+    },
+    {
+      "name": "绀紫色",
+      "code": "10701",
+      "hex": "#482960"
+    },
+    {
+      "name": "紫色",
+      "code": "10700",
+      "hex": "#5E43B7"
+    },
+    {
+      "name": "品红",
+      "code": "10202",
+      "hex": "#EC008C"
+    },
+    {
+      "name": "红色",
+      "code": "10200",
+      "hex": "#C12E1F"
+    },
+    {
+      "name": "胭脂红",
+      "code": "10205",
+      "hex": "#9D2235"
+    },
+    {
+      "name": "桃红色",
+      "code": "10204",
+      "hex": "#F5547C"
+    },
+    {
+      "name": "玉石白",
+      "code": "10100",
+      "hex": "#FFFFFF"
+    },
+    {
+      "name": "黄色",
+      "code": "10400",
+      "hex": "#F4EE2A"
+    },
+    {
+      "name": "暖黄色",
+      "code": "10402",
+      "hex": "#FEC600"
+    },
+    {
+      "name": "青铜",
+      "code": "10801",
+      "hex": "#847D48"
+    },
+    {
+      "name": "金色",
+      "code": "10401",
+      "hex": "#E4BD68"
+    }
+  ]
+}
