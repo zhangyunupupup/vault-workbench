@@ -37,6 +37,7 @@ function saveQueue() {
   $('plan-count').textContent = queue.configs.length + queue.manual.length;
 }
 function view(name) {
+  if (name !== 'builder') $('builder-view').dispatchEvent(new Event('builder-close'));
   if (name !== 'assembly') $('assembly-view').dispatchEvent(new Event('assembly-close'));
   for (const item of document.querySelectorAll('.view')) item.classList.toggle('hidden', item.id !== name + '-view');
   for (const item of document.querySelectorAll('.nav-item')) item.classList.toggle('active', item.dataset.view === name);
@@ -315,6 +316,7 @@ async function connect(root) {
   $('save-source').disabled = true; $('save-source').textContent = '扫描中…'; show('source-error', false);
   try {
     const result = await api('/api/scan', { root }); catalog = result.catalog; updateCatalogUI(); renderPresets(); refreshChoices(); renderManuals(); renderLibrary();
+    window.dispatchEvent(new Event('vault-catalog-change'));
     $('source-dialog').close(); toast(`已连接 ${catalog.count} 个本地模型。`);
   } catch (e) { $('source-error').textContent = e.message; show('source-error', true); }
   finally { $('save-source').disabled = false; $('save-source').textContent = '扫描并连接 ↗'; }
@@ -327,7 +329,7 @@ function updateCatalogUI() {
   $('source-button').title = catalog?.root || '连接模型库';
 }
 
-document.querySelectorAll('.nav-item').forEach(button => button.addEventListener('click', () => view(button.dataset.view)));
+document.querySelectorAll('.nav-item[data-view]').forEach(button => button.addEventListener('click', () => view(button.dataset.view)));
 document.querySelector('.brand').addEventListener('click', e => { e.preventDefault(); view('configure'); });
 document.querySelectorAll('[data-kind]').forEach(button => button.addEventListener('click', () => {
   kind = button.dataset.kind;

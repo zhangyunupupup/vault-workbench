@@ -34,7 +34,7 @@ const caches={async open(name){if(!store.has(name))store.set(name,new Map());con
 const context={URL,Request,caches,fetch:()=>{throw Error('Unexpected network');},self:{location:new URL(origin),addEventListener:(name,fn)=>handlers[name]=fn,skipWaiting:async()=>{},clients:{claim:async()=>{claimed=true;}}}};
 vm.runInNewContext(code,context);
 let pending;handlers.install({waitUntil:p=>pending=p});await pending;
-const cache=store.get('vault-demo-v2.1.0-r2');assert.equal(cache.size,11);
+const cache=store.get('vault-demo-v2.2.0-r1');assert.equal(cache.size,11);
 assert.ok([...cache.keys()].every(k=>!k.includes('/api/')&&!/\.stl|\.pdf/.test(k)));
 store.set('unrelated-user-cache',new Map());store.set('vault-demo-old',new Map());
 handlers.activate({waitUntil:p=>pending=p});await pending;assert.ok(claimed);assert.ok(store.has('unrelated-user-cache'));assert.ok(!store.has('vault-demo-old'));
@@ -44,6 +44,6 @@ for(const url of cache.keys()){
 }
 let nav;handlers.fetch({request:{url:'https://example.test/project/assets/demo/',method:'GET',mode:'navigate'},respondWith:p=>nav=p});assert.ok((await nav).toString().includes('随手搭'));
 let intercepted=false;handlers.fetch({request:{url:'https://example.test/api/state',method:'GET',mode:'cors'},respondWith:()=>intercepted=true});assert.equal(intercepted,false);
-handlers.install({waitUntil:p=>pending=p});await assert.rejects(pending);assert.equal(store.get('vault-demo-v2.1.0-r2').size,11);
-store.delete('vault-demo-v2.1.0-r2');handlers.install({waitUntil:p=>pending=p});await assert.rejects(pending);assert.ok(!store.has('vault-demo-v2.1.0-r2'));
+handlers.install({waitUntil:p=>pending=p});await assert.rejects(pending);assert.equal(store.get('vault-demo-v2.2.0-r1').size,11);
+store.delete('vault-demo-v2.2.0-r1');handlers.install({waitUntil:p=>pending=p});await assert.rejects(pending);assert.ok(!store.has('vault-demo-v2.2.0-r1'));
 console.log('Offline checks passed: all 11 assets exist under a subpath, offline reads work, API is untouched, failed install rejected and unrelated caches retained.');

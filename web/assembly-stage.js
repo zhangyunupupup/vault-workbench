@@ -21,7 +21,7 @@ export function readSTL(buffer) {
   return {geometry,size:max.map((v,i)=>v-min[i])};
 }
 
-function copyFaces(geometry,indices){
+export function copyFaces(geometry,indices){
   const positions=geometry.attributes.position.array,normals=geometry.attributes.normal.array,points=new Float32Array(indices.length*9),normal=new Float32Array(indices.length*9);
   indices.forEach((source,n)=>{points.set(positions.subarray(source,source+9),n*9);normal.set(normals.subarray(source,source+9),n*9);});
   const result=new THREE.BufferGeometry();result.setAttribute('position',new THREE.BufferAttribute(points,3));result.setAttribute('normal',new THREE.BufferAttribute(normal,3));result.computeBoundingBox();result.computeBoundingSphere();return result;

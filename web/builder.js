@@ -6,7 +6,7 @@ const defaults={body:'#8E9089',drawer:'#000000',facade:'#FFFFFF',accessory:'#FF6
 const groups={body:'外壳 / 顶盖',drawer:'内抽 / 分隔',facade:'前面板',accessory:'机构 / 配件'};
 export function initBuilder({api,getConfig,getCatalog,onExport,toast}) {
   let scene={version:1,name:'我的收纳组合',items:[]}, selected=null, checks=[], last=null, preview=null;
-  let stage=null, sequence=0, undo=[], redo=[], busy=false, palette=[];
+  let stage=null, sequence=0, undo=[], redo=[], busy=false, palette=[], details=null, active=false;
   const host=$('builder-view');
   host.innerHTML=`<div class="page-heading"><div><div class="eyebrow">COMPOSE YOUR SPACE / 组合搭建</div><h1>把想法，<span>搭成你的收纳。</span></h1><p>从一个模块开始，安排位置与颜色，带走整套打印文件。</p></div><span class="pill">01 / 布局与配色</span></div>
   <div class="builder-toolbar"><input type="text" id="build-name" maxlength="80" aria-label="组合方案名称" value="我的收纳组合"><button id="build-undo" class="outline-button">撤销</button><button id="build-redo" class="outline-button">重做</button><button id="build-save" class="outline-button">保存方案 ↓</button><button id="build-import" class="outline-button">导入方案 ↑</button><input type="file" id="build-file" accept=".json,application/json" hidden></div>
@@ -16,6 +16,17 @@ export function initBuilder({api,getConfig,getCatalog,onExport,toast}) {
   <section class="builder-results panel"><div class="builder-result-heading"><div><span class="eyebrow">03 / CHECK & PRINT</span><h2>核对布局，准备打印</h2></div><div><button id="build-csv" class="outline-button" disabled>打印清单 CSV ↓</button><button id="build-export" class="primary-button" disabled>按颜色打包 ZIP ↗</button></div></div><div id="build-message" role="status"></div><div id="build-checks"></div><div id="build-totals"></div><div class="builder-table-wrap"><table class="data-table"><thead><tr><th>颜色 / 材料</th><th>零件与原始文件</th><th>整份打印次数</th><th>支撑</th></tr></thead><tbody id="build-parts"></tbody></table></div><details class="builder-hardware"><summary>五金用量与依据</summary><div id="build-hardware"></div></details><p class="field-description">颜色分别建目录；保留原始 STL 字节和文件名。打包同时附带组合方案、打印清单及五金清单。</p></section>`;
 
   const current=()=>scene.items.find(i=>i.id===selected);
+  const realControls=document.createElement('div');realControls.className='builder-real-controls';
+  realControls.innerHTML='<button id="build-real" aria-pressed="true">真实模型 · 开</button><button id="build-real-reload">重新读取</button><span id="build-detail-status" role="status">正在准备真实模型预览…</span>';
+  $('build-stage').before(realControls);
+  const scope=host.querySelector('.builder-scope');scope.textContent='真实模型仅用于查看已核对打印件的外观与参考定位。包络检查仍不包含突出件、开合空间和嵌合，不代表装配或承载认证；弹性件沿用装配页的形变示意，备用连接扣不安装在箱体上。';
+  function detailChanged(){
+    if(!details)return;
+    const count=details.display.size,total=scene.items.length;
+    host.querySelector('.builder-stage-caption span').textContent=count?`真实STL ${count} / ${total} · 其他简化`:'简化外形 · 参考包络';
+    $('build-detail-status').textContent=details.enabled?(details.states.get(selected)||'S3 1F抽屉 / S3 2F整盖翻盖箱可读取本地真实模型。'):'已切换简化布局，可随时打开真实模型。';
+    stage?.update(scene.items,selected,checks);
+  }
   const assemblyButton=document.createElement('button');assemblyButton.id='build-assembly';assemblyButton.className='outline-button';assemblyButton.textContent='查看选中箱体的装配步骤 ↗';
   $('build-fields').prepend(assemblyButton);
   assemblyButton.onclick=()=>{const item=current();if(item)window.dispatchEvent(new CustomEvent('assembly-request',{detail:{config:clone(item.config),colors:clone(item.colors)}}));};
@@ -45,7 +56,9 @@ export function initBuilder({api,getConfig,getCatalog,onExport,toast}) {
     if(scene.items.some(i=>i.id===below&&i.id!==selected))$('build-below').value=below;
     $('build-stack').disabled=busy||scene.items.length<2;
     $('build-checks').innerHTML=checks.map(c=>`<div class="builder-check ${c.level}"><strong>${esc(scene.items.find(i=>i.id===c.id)?.title.replace(' × 1','')||c.id)}</strong><span>${esc(c.message)}</span></div>`).join('');
-    stage?.update(scene.items,selected,checks);
+    $('build-real-reload').disabled=busy||!stage;
+    if(active&&!busy)details?.sync(scene.items,selected);
+    if(details)detailChanged();else stage?.update(scene.items,selected,checks);
   }
   async function validate(next,{history=true,selection=selected}={}) {
     if(busy) return false;
@@ -121,12 +134,16 @@ export function initBuilder({api,getConfig,getCatalog,onExport,toast}) {
   $('build-export').onclick=async()=>{if(busy||!preview)return;busy=true;render();$('build-export').disabled=true;try{const job=await api('/api/export',{scene});onExport(job);}catch(e){toast(e.message,true);}finally{busy=false;render();$('build-export').disabled=!preview;}};
   $('build-fit').onclick=()=>stage?.fit();
   $('build-mode').onclick=()=>{if(!stage)return;stage.moving=!stage.moving;$('build-mode').setAttribute('aria-pressed',String(stage.moving));$('build-mode').textContent=stage.moving?'✥ 移动箱体':'↻ 旋转视角';};
-  $('build-stage').addEventListener('stage-error',()=>{setMessage('三维画布不可用，可继续使用箱体列表和坐标编辑。',true);});
-  host.addEventListener('builder-open',()=>{refreshModels();stage?.resize();if(!busy&&getCatalog())validate(scene,{history:false});});
+  $('build-real').onclick=()=>{if(!details)return;details.enabled=!details.enabled;if(!details.enabled)details.clear();$('build-real').setAttribute('aria-pressed',String(details.enabled));$('build-real').textContent=details.enabled?'真实模型 · 开':'真实模型 · 关';render();};
+  $('build-real-reload').onclick=()=>{details?.clear();render();};
+  $('build-stage').addEventListener('stage-error',()=>{details?.clear();if(details)details.enabled=false;stage?.update([],null);stage=null;$('build-mode').disabled=true;$('build-real').disabled=true;$('build-real-reload').disabled=true;setMessage('三维画布不可用，可继续使用箱体列表和坐标编辑。',true);});
+  host.addEventListener('builder-close',()=>{active=false;details?.clear();stage?.update([],null);});
+  window.addEventListener('vault-catalog-change',()=>{details?.clear();if(active&&!busy)validate(scene,{history:false});});
+  host.addEventListener('builder-open',()=>{active=true;refreshModels();stage?.resize();if(!busy&&getCatalog())validate(scene,{history:false});});
   refreshModels();render();
   api('/assets/palette.json').then(data=>{palette=data.colors;$('build-palette-source').href=data.source;for(const g of Object.keys(groups)){$('build-palette-'+g).innerHTML='<option value="">自定义颜色</option>'+palette.map(c=>`<option value="${c.hex.toUpperCase()}">${esc(c.name)} ${esc(c.code)}</option>`).join('');}render();}).catch(()=>toast('官方色板暂时不可用，仍可自定义颜色。',true));
-  import('/builder-stage.js').then(({BuilderStage})=>{
-    stage=new BuilderStage($('build-stage'),id=>{if(!busy){selected=id;render();}},snapMove);$('build-stage-fallback').remove();stage.update(scene.items,selected,checks);stage.fit();
+  Promise.all([import('/assets/builder-detail-stage.js'),import('/assets/builder-detail.js')]).then(([{DetailedBuilderStage},{BuilderDetails}])=>{
+    stage=new DetailedBuilderStage($('build-stage'),id=>{if(!busy){selected=id;render();}},snapMove);details=new BuilderDetails(api,detailChanged);stage.detailProvider=item=>details.object(item);$('build-stage-fallback').remove();render();stage.fit();
   }).catch(()=>{ $('build-stage-fallback').textContent='三维画布不可用。仍可通过左侧列表、右侧坐标编辑、保存与导出。';$('build-mode').disabled=true;});
   try{const saved=JSON.parse(localStorage.getItem(key));if(saved)validate(saved,{history:false}).then(ok=>{if(ok)stage?.fit();});else validate(scene,{history:false});}catch{setMessage('已保存的方案无法读取，请导入备份或重新添加箱体。',true);}
 }

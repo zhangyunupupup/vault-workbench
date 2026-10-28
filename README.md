@@ -6,6 +6,7 @@
 
 ## 功能
 
+- 组合搭建的真实模型预览：已核对的S3 1F抽屉与S3 2F整盖翻盖箱可直接读取本机STL，保留顶盖、旋钮、面板、锁扣与铰链细节，支持配色和阴影；其余型号继续显示简化外形。
 - 装配演示：S3 1F 抽屉与 S3 2F 翻盖箱的真实 STL 分解预览、零件点选、步骤播放、五金和手册页码联动。
 - 三维组合搭建：拖动与边缘吸附、位置输入、复制、撤销重做、保存与导入方案。
 - 参考包络碰撞与悬空检查；30个拓竹 PLA Basic 色号及自定义配色，按颜色分别生成打印任务和 ZIP。
@@ -22,7 +23,7 @@
 
 版本更新请查看 [GitHub Releases](https://github.com/zhangyunupupup/vault-workbench/releases) 或 [更新记录](CHANGELOG.md)。
 
-**Windows免安装版**：从[最新Release](https://github.com/zhangyunupupup/vault-workbench/releases/latest)下载 `VAULT-Workbench-2.1.0-windows-x64.zip`，完整解压到可写目录后双击「启动VAULT工作台.cmd」。内置Python运行环境，支持Windows 10/11 x64；仍需自己的VAULT资料库。不要在ZIP内部直接运行。
+**Windows免安装版**：从[最新Release](https://github.com/zhangyunupupup/vault-workbench/releases/latest)下载 `VAULT-Workbench-2.2.0-windows-x64.zip`，完整解压到可写目录后双击「启动VAULT工作台.cmd」。内置Python运行环境，支持Windows 10/11 x64；仍需自己的VAULT资料库。不要在ZIP内部直接运行。
 
 **手机先体验**：[打开「VAULT 随手搭」](https://zhangyunupupup.github.io/vault-workbench/assets/demo/index.html)。无需模型库，可做两套基准的简化布局、配色与方案JSON操作；首次联网并显示「离线已就绪」后可离线再访。iPhone可通过Safari分享菜单添加到主屏幕，其他浏览器可使用安装菜单。手机保存的JSON在桌面「组合搭建」导入后重新核对，再导出真实STL。
 
@@ -63,6 +64,7 @@ node tests/test_assembly_mesh.mjs
 node tests/test_assembly_controls.mjs
 node tests/test_assembly_pose.mjs
 node tests/test_demo.mjs --fixture
+node tests/test_builder_detail.mjs
 ```
 
 真实资料库相关测试需要 `vault/catalog.py` 中配置的资料路径存在；未连接时会跳过。导出契约测试使用临时目录运行。
@@ -72,6 +74,16 @@ node tests/test_demo.mjs --fixture
 运行状态、导出包、临时文件和本地发行包分别保存在 `runtime/`、`exports/`、`tmp/`、`dist/`，已由 Git 忽略。发行包通过 `scripts/build_release.py` 白名单构建，官方运行环境版本与许可见[第三方资源](THIRD_PARTY_NOTICES.md)。
 
 本项目为个人本地工具，非 USSA 官方软件。
+
+## 组合搭建真实模型（v2.2.0）
+
+进入「组合搭建」后默认开启「真实模型」。S3 1F标准单抽屉（网格顶盖或无顶盖）、S3 2F标准整盖翻盖箱在本地文件版本匹配时加载真实打印件；可关闭回到简化布局，或点击「重新读取」清空缓存后核对最新文件。未支持的型号、选配、版本不符或读取失败会显示原因并使用简化外形。
+
+![组合搭建真实STL预览](output/组合搭建真实模型截图.png)
+
+同配置的复制箱体共享几何，颜色与位置独立。最多缓存2套配置及500万面，场景最多显示600万面，选中的箱体优先；超出时标注简化显示。离开页面或重扫模型库时释放真实模型缓存。真实模型仅在连接本地资料库的桌面工作台使用，手机随手搭仍为简化演示。
+
+模型按外壳后下左角定位并保持源尺寸。布局检查仍使用已有参考包络，不检查真实突出件、开合空间或嵌合；高还原外观不代表实物公差或承载认证。详见[真实模型验证记录](docs/builder-detail-evidence.md)。
 
 ## 装配演示（v2.0.0）
 
