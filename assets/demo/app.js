@@ -70,7 +70,7 @@ else{scene=normalize({version:1,name:'我的随手搭方案',items:[{id:'demo-dr
 import('../builder-stage.js').then(({BuilderStage})=>{stage=new BuilderStage($('stage'),id=>{selected=id;render();},(id,p)=>{try{const next=clone(scene);next.items.find(i=>i.id===id).position=snap(scene.items,id,p);setScene(next,{selection:id});}catch(e){message(e.message,true);render();}});$('stage-fallback').remove();render();stage.fit();}).catch(()=>{$('stage-fallback').textContent='三维画布不可用。仍可通过列表、坐标、叠放、配色和方案文件操作。';$('mode').disabled=true;});
 async function offlineStatus(){
   try{
-    const cache=await caches.open('vault-demo-v2.1.0-r2');
+    const cache=await caches.open('vault-demo-v2.2.0-r1');
     if(await cache.match(new URL('index.html',location.href).href))$('offline-status').textContent='离线已就绪 · 可添加到主屏幕';
   }catch{$('offline-status').textContent='此浏览器未提供离线缓存，请保持联网。';}
 }

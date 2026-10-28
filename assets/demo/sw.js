@@ -1,5 +1,5 @@
 // Scope is this demo directory. Never cache workbench API, models or manuals.
-const CACHE='vault-demo-v2.1.0-r2';
+const CACHE='vault-demo-v2.2.0-r1';
 const FILES=['./index.html','./app.js','./model.js','./style.css','./manifest.webmanifest','./icon.svg','../builder-stage.js','../palette.json','../vendor/three.module.js','../vendor/OrbitControls.js','../vendor/THREE-LICENSE.txt'];
 const urls=FILES.map(p=>new URL(p,self.location.href).href);
 self.addEventListener('install',event=>event.waitUntil((async()=>{

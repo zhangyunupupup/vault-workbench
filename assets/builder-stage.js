@@ -41,12 +41,17 @@ export class BuilderStage {
   }
   update(items, selected, checks=[]) {
     this.items = items;
+    const discardedMaterials=new Set(),discardedGeometry=new Set();
     for (const group of this.groups) {
-      this.scene.remove(group); group.traverse(o => {o.geometry?.dispose(); o.material?.dispose();});
+      this.scene.remove(group); group.traverse(o => {if(o.geometry&&!o.userData.sharedGeometry)discardedGeometry.add(o.geometry);if(o.material)discardedMaterials.add(o.material);});
     }
+    discardedGeometry.forEach(g=>g.dispose());discardedMaterials.forEach(m=>m.dispose());
     this.groups = items.map(item => {
       const g = new THREE.Group(), [w,d,h] = item.size, c=item.colors;
       g.userData.id=item.id; g.position.set(item.position[0],item.position[2],item.position[1]);
+      const detail=this.detailProvider?.(item);
+      if(detail)g.add(detail);
+      else {
       const box=(sx,sy,sz,x,y,z,color)=>{
         const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),new THREE.MeshStandardMaterial({color,roughness:.65}));
         m.position.set(x,y,z); m.userData.id=item.id; g.add(m); return m;
@@ -67,8 +72,9 @@ export class BuilderStage {
         box(w,7,d,w/2,h-3.5,d/2,c.body);
         box(22,14,5,w/2,h-17,d+1,c.accessory);
       }
+      }
       const state=checks.some(x=>x.id===item.id&&x.level==='error')?'error':checks.some(x=>x.id===item.id&&x.level==='warning')?'warning':'ok';
-      const geometry=new THREE.EdgesGeometry(new THREE.BoxGeometry(w+2,h+2,d+2));
+      const envelope=new THREE.BoxGeometry(w+2,h+2,d+2),geometry=new THREE.EdgesGeometry(envelope);envelope.dispose();
       const outline=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:state==='error'?0xc44732:item.id===selected?0xe86634:state==='warning'?0xaa822d:0x71866d}));
       outline.position.set(w/2,h/2,d/2); g.add(outline); this.scene.add(g); return g;
     });
