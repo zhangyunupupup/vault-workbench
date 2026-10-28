@@ -21,7 +21,12 @@ export class DetailedBuilderStage extends BuilderStage {
     this.draw();
   }
   fit(){
-    const box=new THREE.Box3();this.groups.forEach(g=>box.expandByObject(g));
+    const box=new THREE.Box3();
+    this.groups.forEach(g=>{
+      g.updateMatrixWorld(true);const detail=g.children.find(c=>c.userData.layoutBounds);
+      if(detail){box.union(detail.userData.layoutBounds.clone().applyMatrix4(g.matrixWorld));for(const c of g.children)if(c!==detail)box.expandByObject(c);}
+      else box.expandByObject(g);
+    });
     if(box.isEmpty()){super.fit();return;}
     const rect=this.host.getBoundingClientRect(),aspect=rect.width&&rect.height?rect.width/rect.height:1,direction=new THREE.Vector3(1.5,1.3,1.8).normalize();
     const center=box.getCenter(new THREE.Vector3()),distance=Math.max(80,cameraDistance(box,aspect,this.camera.fov,direction));

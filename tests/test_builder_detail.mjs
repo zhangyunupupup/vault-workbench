@@ -7,12 +7,16 @@ import {BuilderStage} from '../web/assets/builder-stage.js';
 import {cameraDistance} from '../web/assets/builder-detail-stage.js';
 const assemblySource=(await readFile('web/assembly-stage.js','utf8')).replaceAll("'/assets/vendor/three.module.js'",JSON.stringify(new URL('../web/assets/vendor/three.module.js',import.meta.url).href)).replaceAll("'/assets/vendor/OrbitControls.js'",JSON.stringify(new URL('../web/assets/vendor/OrbitControls.js',import.meta.url).href)).replaceAll("'/assets/assembly-pose.js'",JSON.stringify(new URL('../web/assets/assembly-pose.js',import.meta.url).href));
 const assemblyURL='data:text/javascript;base64,'+Buffer.from(assemblySource).toString('base64');
-const detailSource=(await readFile('web/assets/builder-detail.js','utf8')).replaceAll("'./vendor/three.module.js'",JSON.stringify(new URL('../web/assets/vendor/three.module.js',import.meta.url).href)).replaceAll("'./assembly-pose.js'",JSON.stringify(new URL('../web/assets/assembly-pose.js',import.meta.url).href)).replaceAll("'/assembly-stage.js'",JSON.stringify(assemblyURL));
+const detailSource=(await readFile('web/assets/builder-detail.js','utf8')).replaceAll("'./vendor/three.module.js'",JSON.stringify(new URL('../web/assets/vendor/three.module.js',import.meta.url).href)).replaceAll("'./assembly-pose.js'",JSON.stringify(new URL('../web/assets/assembly-pose.js',import.meta.url).href)).replaceAll("'./layout-mesh-loader.js'",JSON.stringify(new URL('../web/assets/layout-mesh-loader.js',import.meta.url).href)).replaceAll("'/assembly-stage.js'",JSON.stringify(assemblyURL));
 const {modelKey,candidate,loadTemplate,instantiate,BuilderDetails,DRAW_BUDGET}=await import('data:text/javascript;base64,'+Buffer.from(detailSource).toString('base64'));
 const config={kind:'drawer',family:'S',depth:3,height:1,drawers:[1]},item={id:'a',config,position:[20,30,40],size:[164.8,156.1,57.01],title:'test',colors:{body:'#88AA77',drawer:'#000000',facade:'#FFFFFF',accessory:'#FF6A13'}};
 assert.equal(modelKey({...config,colors:{body:'#FFF'},quantity:10}),modelKey({...config,quantity:1}));
 assert.equal(modelKey(config),modelKey(Object.fromEntries(Object.entries(config).reverse())));
-assert.ok(candidate(config));assert.ok(!candidate({...config,family:'M'}));assert.ok(!candidate({...config,top_handle:true}));
+assert.ok(candidate(config));assert.ok(candidate({...config,family:'M'}));assert.ok(!candidate({...config,top_handle:true}));
+assert.ok(candidate({kind:'sustainer',family:'XL',depth:7,height:1,variant:'sealed'}));
+assert.ok(candidate({kind:'drawer',family:'L',depth:7,height:4,drawers:[2,1,1]}));
+assert.ok(!candidate({...config,family:'XL'}));assert.ok(!candidate({...config,depth:8}));
+assert.ok(!candidate({kind:'sustainer',family:'XL',height:2}));
 for(const aspect of [.65,1.2,2]){
   const bounds=new THREE.Box3(new THREE.Vector3(-30,0,10),new THREE.Vector3(350,200,180)),direction=new THREE.Vector3(1.5,1.3,1.8).normalize(),center=bounds.getCenter(new THREE.Vector3()),camera=new THREE.PerspectiveCamera(38,aspect,.1,20000);
   camera.position.copy(center).addScaledVector(direction,cameraDistance(bounds,aspect,38,direction));camera.lookAt(center);camera.updateMatrixWorld();
@@ -27,6 +31,12 @@ assert.ok(Math.abs(template.anchor.determinant()-1)<1e-10,'Use a rigid turn, nev
 const mesh=instantiate(template,item),box=new THREE.Box3().setFromObject(mesh);
 assert.ok(box.min.toArray().every(v=>Math.abs(v)<1e-10));assert.ok(box.max.toArray().every((v,n)=>Math.abs(v-[2,1,3][n])<1e-10));
 assert.equal(mesh.children[0].material.color.getHexString(),'88aa77');
+const tilted=structuredClone(guide),c=Math.SQRT1_2;
+tilted.joints[0].composition[0].elements[0].matrix=[c,-c,0,c,c,0,0,0,1];
+const tiltedTemplate=await loadTemplate(tilted,{fetchMesh});
+const tiltedObject=instantiate(tiltedTemplate,item),tiltedBounds=new THREE.Box3().setFromObject(tiltedObject,true);
+assert.ok(tiltedBounds.min.toArray().every(v=>Math.abs(v)<1e-9),'Rotated print orientation anchors actual installed vertices, never the conservative source bounding box.');
+assert.deepEqual(tiltedTemplate.bounds.min.toArray(),tiltedBounds.min.toArray());tiltedObject.traverse(o=>o.material?.dispose());tiltedTemplate.dispose();
 const second=instantiate(template,{...item,id:'b',colors:{...item.colors,body:'#123456'}});
 assert.equal(mesh.children[0].geometry,second.children[0].geometry);assert.notEqual(mesh.children[0].material,second.children[0].material);
 let disposed=0;template.nodes[0].geometry.addEventListener('dispose',()=>disposed++);
@@ -44,6 +54,13 @@ await details.sync([item,{...item,id:'b'}],'b');assert.deepEqual([...details.dis
 details.enabled=false;await details.sync([item],'a');assert.equal(details.display.size,0);details.clear();
 let complete;const cancelled=new BuilderDetails(()=>new Promise(resolve=>complete=resolve),()=>{},{fetchMesh});const pending=cancelled.sync([item],'a');cancelled.clear();complete(guide);await pending;assert.equal(cancelled.cache.size,0);
 let failures=0;const bad=new BuilderDetails(async()=>{failures++;throw Error('bad source');},()=>{},{fetchMesh});await bad.sync([item,{...item,id:'b'}],'a');assert.equal(failures,1);assert.equal(bad.display.size,0);
+// Switching selection must evict a lower-priority cached model before refusing
+// the newly selected model; repeated print copies do not inflate shared cache.
+const selectedDetails=new BuilderDetails(async()=>guide,()=>{},{fetchMesh});
+const akey=modelKey(config),bconfig={...config,family:'M'},bkey=modelKey(bconfig);
+let oldDisposed=false;selectedDetails.cache.set(akey,{cacheFaces:8000000,triangles:8000000,dispose(){oldDisposed=true;}});
+await selectedDetails.sync([item,{...item,id:'selected',config:bconfig}],'selected');
+assert.ok(selectedDetails.display.has('selected'));assert.ok(oldDisposed);selectedDetails.clear();
 console.log('Builder detail checks passed: anchoring/axis, shared geometry with independent colors, movement/disposal, versions, cache, selected-first budget, cancellation and fallback.');
 
 if(process.argv.includes('--local')){

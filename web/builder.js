@@ -23,8 +23,8 @@ export function initBuilder({api,getConfig,getCatalog,onExport,toast}) {
   function detailChanged(){
     if(!details)return;
     const count=details.display.size,total=scene.items.length;
-    host.querySelector('.builder-stage-caption span').textContent=count?`真实STL ${count} / ${total} · 其他简化`:'简化外形 · 参考包络';
-    $('build-detail-status').textContent=details.enabled?(details.states.get(selected)||'S3 1F抽屉 / S3 2F整盖翻盖箱可读取本地真实模型。'):'已切换简化布局，可随时打开真实模型。';
+    host.querySelector('.builder-stage-caption span').textContent=count?`真实STL ${count} / ${total} · ${count===total?'全部已加载':'其他简化'}`:'简化外形 · 参考包络';
+    $('build-detail-status').textContent=details.enabled?(details.states.get(selected)||'当前可选型号均支持基础箱体真实 STL；选配定位范围见说明。'):'已切换简化布局，可随时打开真实模型。';
     stage?.update(scene.items,selected,checks);
   }
   const assemblyButton=document.createElement('button');assemblyButton.id='build-assembly';assemblyButton.className='outline-button';assemblyButton.textContent='查看选中箱体的装配步骤 ↗';

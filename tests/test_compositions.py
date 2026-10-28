@@ -95,4 +95,4 @@ class CompositionContracts(unittest.TestCase):
             if labels:self.assertEqual(elements[0]['key'],'facade_cap0')
             hardware=next(h for h in guide['hardware'] if h['reason']=='前面板固定')
             self.assertEqual(hardware['quantity'],2)
-            self.assertIn('两孔',hardware['source'])
+            self.assertRegex(hardware['source'],r'两孔|2孔')

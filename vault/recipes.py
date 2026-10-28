@@ -67,10 +67,12 @@ class Recipe:
                 self.named("Key Cap.stl", kind="drawer", reason="旋钮配套盖", source=f"{DRAWER} 第1页")
             self.named("Springs.stl", kind="drawer", reason="文件内已有左右弹簧，整份打印 1 次",
                        source=f"{DRAWER} 第2页；STL 连通体核对为2件", unit="对 / 文件")
-            label_covers_hole = family == 'S' and inner_height == 1 and cfg.get('labels', True)
-            self.named("Facade Cap.stl", 1 if label_covers_hole else 2, kind="drawer",
-                       reason="S1F 标签替代一侧孔盖，另一侧 1 个孔盖" if label_covers_hole else "面板左右各 1 个孔盖",
-                       source=f"{DRAWER} 第6页；S1F 标签槽与孔盖互斥几何核对" if label_covers_hole else f"{DRAWER} 第6页")
+            facade_holes = 2 if family == 'S' and inner_height == 1 else 4 if family == 'S' or inner_height == 1 else 6
+            label_covers_hole = cfg.get('labels', True)
+            cap_count = facade_holes - int(label_covers_hole)
+            self.named("Facade Cap.stl", cap_count, kind="drawer",
+                       reason=f"面板有{facade_holes}处孔位；" + (f"标签替代1处孔盖，其余{cap_count}处装盖" if label_covers_hole else "每孔一个孔盖"),
+                       source=f"{DRAWER} 第6页；S/M/L三种高度的孔位与标签槽截面核对")
             depth = model[-1]
             self.named(f"x{depth} Runner Slides.stl", kind="drawer", reason="文件内包含左右内滑轨",
                        source=f"{DRAWER} 第4页；STL 连通体核对为2件", unit="对 / 文件")
@@ -83,10 +85,9 @@ class Recipe:
             if cfg.get("labels", True):
                 self.named("Label.stl", kind="drawer", optional=True, reason="每个面板一个，可在切片器添加文字", source=f"{DRAWER} 第5–6页")
             self.drawer_interior(cfg, family, model, inner_height)
-            s1f = family == 'S' and inner_height == 1
-            self.bolt("M4 × 14 mm 螺栓", 2 if s1f else 4 if inner_height == 1 else 6, "前面板固定",
-                      f"{DRAWER} 第6页；S1F 面板及内抽两孔定位核对" if s1f else f"{MANUAL} 第18页；第3页总表有差异",
-                      "数量按两孔核对；安装前复核打印孔径及螺栓长度" if s1f else "按细分图；打印前核对实际孔数")
+            self.bolt("M4 × 14 mm 螺栓", facade_holes, "前面板固定",
+                      f"{DRAWER} 第6页；S/M/L面板{facade_holes}孔定位核对",
+                      f"数量按{facade_holes}孔核对；安装前复核打印孔径及螺栓长度")
         roof = cfg.get("roof", "grid")
         if roof != "none":
             if roof not in ROOFS:

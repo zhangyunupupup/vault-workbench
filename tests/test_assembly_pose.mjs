@@ -37,6 +37,9 @@ const part={geometry:merged,material:new THREE.MeshBasicMaterial(),id:'pair',cop
 const copy=(g,faces)=>{const r=new THREE.BufferGeometry(),a=g.attributes.position.array;r.setAttribute('position',new THREE.Float32BufferAttribute(faces.flatMap(i=>[...a.slice(i,i+9)]),3));r.computeVertexNormals();r.computeBoundingBox();return r;};
 const definition={elements:groups.map((faces,i)=>({...description,key:'piece'+i,selection:{connected:i,faces:faces.length}}))};
 const prepared=prepareElements(part,definition,copy,()=>{});assert.equal(prepared.elements.length,2);assert.equal(prepared.owned.size,2);assert.equal(prepared.owned.has(merged),false);
+const doubled=prepareElements({...part,copies:2},{elements:[...definition.elements,...definition.elements]},copy,()=>{});
+assert.equal(doubled.elements.length,4);for(const g of doubled.owned)g.dispose();
+assert.throws(()=>prepareElements({...part,copies:2},{elements:[definition.elements[0],definition.elements[0],definition.elements[0],definition.elements[1]]},copy,()=>{}));
 assert.throws(()=>prepareElements(part,{elements:[definition.elements[0],definition.elements[0]]},copy,()=>{}));
 assert.throws(()=>prepareElements(part,{elements:[{...description,selection:{all:true,faces:23}}]},copy,()=>{}));
 for(const g of prepared.owned)g.dispose();geometry.dispose();second.dispose();merged.dispose();deformed.dispose();part.material.dispose();

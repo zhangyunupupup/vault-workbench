@@ -18,7 +18,7 @@ class DistributionContracts(unittest.TestCase):
         self.assertFalse(any(p.suffix.lower() in ('.stl','.pdf','.3mf','.pyc') or {'runtime','exports','tmp','python'}&set(p.relative_to(BASE).parts) for p in files))
         demo=demo_files()
         self.assertTrue(any(p.name=='sw.js' for p in demo))
-        self.assertFalse(any(p.name in ('server.py','recipes.py','drawer.jpg') for p in demo))
+        self.assertFalse(any(p.name in ('server.py','recipes.py','drawer.jpg','builder-detail.js','layout-mesh-worker.js','layout_data.json') for p in demo))
 
     def test_modified_runtime_rejected(self):
         with tempfile.TemporaryDirectory(dir=BASE/'tmp') as folder:

@@ -1,24 +1,32 @@
 import * as THREE from './vendor/three.module.js';
 import {prepareElements,elementMatrix} from './assembly-pose.js';
 import {readSTL,copyFaces,supportRemovedGeometry} from '/assembly-stage.js';
+import {indexedGeometry} from './layout-mesh-loader.js';
 
-export const DRAW_BUDGET=6000000,CACHE_BUDGET=5000000;
+export const DRAW_BUDGET=20000000,CACHE_BUDGET=8000000;
 const clone=v=>structuredClone(v);
 function sorted(value){return Array.isArray(value)?value.map(sorted):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().filter(k=>!['colors','quantity'].includes(k)).map(k=>[k,sorted(value[k])])):value;}
 export const modelKey=config=>JSON.stringify(sorted(config));
+export function transformedBounds(geometry,matrix){
+  const bounds=new THREE.Box3(),point=new THREE.Vector3(),positions=geometry.attributes.position;
+  for(let i=0;i<positions.count;i++)bounds.expandByPoint(point.fromBufferAttribute(positions,i).applyMatrix4(matrix));
+  return bounds;
+}
 const hash=async buffer=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)),b=>b.toString(16).padStart(2,'0')).join('');
 export function candidate(c){
-  const kind=c.kind??'drawer';
-  return ['drawer','sustainer'].includes(kind)&&(c.family??'S')==='S'&&(c.depth??3)===3&&(c.height??1)===(kind==='drawer'?1:2)
+  const kind=c.kind??'drawer',family=c.family??'S',height=c.height??1,drawers=c.drawers??[height];
+  return ['drawer','sustainer'].includes(kind)&&['S','M','L','XL'].includes(family)&&[3,4,5,6,7].includes(c.depth??3)&&[1,2,4].includes(height)
     &&(c.interior??'none')==='none'&&(c.base??'none')==='none'&&(c.mount??'none')==='none'
-    &&!['wheels','top_handle','split_roof','rails'].some(k=>c[k])
-    &&(kind==='drawer'?(c.key??'standard')==='standard'&&JSON.stringify(c.drawers??[1])==='[1]'&&['none','grid'].includes(c.roof??'grid'):(c.variant??'standard')==='standard');
+    &&!['wheels','top_handle','split_roof'].some(k=>c[k])
+    &&(kind==='drawer'?family!=='XL'&&(c.key??'standard')==='standard'&&Array.isArray(drawers)&&drawers.length>0&&drawers.every(h=>[1,2,4].includes(h))&&drawers.reduce((a,b)=>a+b,0)===height&&['none','grid'].includes(c.roof??'grid')
+      :(['S','M'].includes(family)?(c.variant??'standard')==='standard':(family!=='XL'||height===1)&&['flat','dividers','sealed'].includes(c.variant??'flat')));
 }
 export function instantiate(template,item){
   const root=new THREE.Group(),materials={};root.matrix.copy(template.anchor);root.matrixAutoUpdate=false;
+  root.userData.layoutBounds=template.bounds;
   for(const node of template.nodes){
     const color=item.colors[node.colorGroup];
-    materials[node.colorGroup]??=new THREE.MeshStandardMaterial({color,roughness:.62,metalness:.02,side:THREE.DoubleSide});
+    materials[node.colorGroup]??=new THREE.MeshStandardMaterial({color,roughness:.62,metalness:.02,side:THREE.DoubleSide,flatShading:true});
     const mesh=new THREE.Mesh(node.geometry,materials[node.colorGroup]);mesh.matrix.copy(node.matrix);mesh.matrixAutoUpdate=false;
     mesh.userData={id:item.id,sharedGeometry:true};mesh.castShadow=true;mesh.receiveShadow=true;root.add(mesh);
   }
@@ -26,22 +34,28 @@ export function instantiate(template,item){
 }
 export async function loadTemplate(guide,{fetchMesh=fetch,signal}={}){
   const profile=guide.joints?.find(p=>p.mode==='composition'&&p.motion==='explode');
-  if(!guide.coverage_complete||!profile)throw Error('当前配置或文件版本未建立完整定位。');
+  if(!(guide.coverage_complete||guide.layout_ready)||!profile)throw Error('当前配置或文件版本未建立完整定位。');
   const triangles=profile.composition.reduce((sum,p)=>sum+p.elements.filter(e=>e.accuracy!=='spare').reduce((n,e)=>n+e.selection.faces,0),0);
-  if(triangles>CACHE_BUDGET)throw Error('单套模型超过真实网格预算。');
+  if(guide.parts.reduce((sum,p)=>sum+p.faces,0)>CACHE_BUDGET||triangles>DRAW_BUDGET)throw Error('单套模型超过真实网格预算。');
   const geometry=new Set(),nodes=[];let shell;
   try{
     for(const definition of profile.composition){
       if(signal?.aborted)throw new DOMException('加载已取消','AbortError');
       const part=guide.parts.find(p=>p.id===definition.id);if(!part)throw Error('装配文件映射缺失。');
-      const response=await fetchMesh(`/api/assembly-mesh/${encodeURIComponent(part.id)}?revision=${encodeURIComponent(part.mtime_ns)}`,{signal});
+      const response=await fetchMesh(`${guide.mesh_route||'/api/assembly-mesh'}/${encodeURIComponent(part.id)}?revision=${encodeURIComponent(part.mtime_ns)}`,{signal});
       if(!response.ok)throw Error('本地模型读取失败，请重新扫描模型库。');
       const buffer=await response.arrayBuffer();
       if(buffer.byteLength!==part.bytes||await hash(buffer)!==definition.sha256)throw Error('模型版本已变化，请重新扫描并加载真实模型。');
       if(signal?.aborted)throw new DOMException('加载已取消','AbortError');
-      const source=readSTL(buffer).geometry;geometry.add(source);
+      const indexed=part.faces>500000&&definition.elements.every(e=>e.selection.all&&!e.deform&&JSON.stringify(e.supports)===JSON.stringify(definition.elements[0].supports));
+      const source=indexed?await indexedGeometry(buffer,signal,definition.elements[0].supports):readSTL(buffer).geometry;geometry.add(source);
       const material=new THREE.MeshBasicMaterial();let prepared;
-      try{prepared=prepareElements({...part,geometry:source,material},definition,copyFaces,supportRemovedGeometry);}finally{material.dispose();}
+      try{
+        if(indexed){
+          if(source.index.count/3+source.userData.removedFaces!==part.faces||definition.elements.some(e=>e.selection.faces!==part.faces)||definition.elements.length!==part.copies)throw Error('完整模型面数或份数不一致。');
+          prepared={owned:new Set(),elements:definition.elements.map(description=>({description,geometry:source}))};
+        }else prepared=prepareElements({...part,geometry:source,material},definition,copyFaces,supportRemovedGeometry);
+      }finally{material.dispose();}
       for(const g of prepared.owned)geometry.add(g);
       const used=new Set();
       for(const element of prepared.elements){
@@ -58,9 +72,13 @@ export async function loadTemplate(guide,{fetchMesh=fetch,signal}={}){
     // Turn the assembly around the vertical axis so its front faces layout +Z.
     // A rotation preserves handedness, lettering and left/right part geometry.
     const anchor=new THREE.Matrix4().makeRotationY(Math.PI);
-    const box=shell.geometry.boundingBox.clone().applyMatrix4(shell.matrix).applyMatrix4(anchor);
+    // Rotated print orientations make a transformed source AABB too large.
+    // Measure installed vertices themselves before anchoring to the floor.
+    const box=transformedBounds(shell.geometry,anchor.clone().multiply(shell.matrix));
     anchor.setPosition(-box.min.x,-box.min.y,-box.min.z);
-    return {nodes,anchor,triangles,geometry,dispose(){geometry.forEach(g=>g.dispose());geometry.clear();}};
+    const bounds=new THREE.Box3();for(const node of nodes)bounds.union(transformedBounds(node.geometry,anchor.clone().multiply(node.matrix)));
+    const cacheFaces=[...geometry].reduce((n,g)=>n+(g.index?.count??g.attributes.position.count)/3,0);
+    return {nodes,anchor,bounds,triangles,cacheFaces,geometry,note:guide.omitted?.length?'真实STL · 齿条未定位，预览省略；打印清单保留':'真实STL · 已核对参考定位',dispose(){geometry.forEach(g=>g.dispose());geometry.clear();}};
   }catch(e){geometry.forEach(g=>g.dispose());throw e;}
 }
 
@@ -81,7 +99,15 @@ export class BuilderDetails {
     const keys=[...new Set(priority.filter(i=>candidate(i.config)).map(i=>modelKey(i.config)))].slice(0,2);
     // Evict templates not being used by this update before allocating new meshes.
     for(const [key,value]of this.cache)if(!keys.includes(key)){value.dispose();this.cache.delete(key);}
-    const failures=new Map();let drawn=0,cached=[...this.cache.values()].reduce((n,v)=>n+v.triangles,0);
+    const failures=new Map();let drawn=0,cached=[...this.cache.values()].reduce((n,v)=>n+(v.cacheFaces??v.triangles),0);
+    const makeRoom=faces=>{
+      for(const [key,value]of this.cache){
+        if(cached+faces<=CACHE_BUDGET)break;
+        if([...this.display.values()].includes(key))continue;
+        cached-=value.cacheFaces??value.triangles;value.dispose();this.cache.delete(key);
+      }
+      if(cached+faces>CACHE_BUDGET)throw Error('真实模型缓存预算已满，选中后优先加载。');
+    };
     for(const item of priority){
       if(epoch!==this.epoch)return;
       const key=modelKey(item.config);
@@ -92,17 +118,17 @@ export class BuilderDetails {
       if(!template){
         this.states.set(item.id,'正在读取真实打印件…');this.notify();
         try{
-          const guide=await this.api('/api/assembly',{config:item.config});
+          const guide=await this.api('/api/layout',{config:item.config});
           if(epoch!==this.epoch)return;
-          const faces=guide.parts.reduce((n,p)=>n+p.faces*p.copies,0);
-          if(cached+faces>CACHE_BUDGET)throw Error('真实模型缓存预算已满，选中后优先加载。');
+          const faces=guide.parts.reduce((n,p)=>n+p.faces,0);makeRoom(faces);
           template=await loadTemplate(guide,{fetchMesh:this.fetchMesh,signal});
           if(epoch!==this.epoch){template.dispose();return;}
-          this.cache.set(key,template);cached+=template.triangles;
+          try{makeRoom(template.cacheFaces);}catch(e){template.dispose();throw e;}
+          this.cache.set(key,template);cached+=template.cacheFaces;
         }catch(e){if(epoch!==this.epoch)return;failures.set(key,e.message);this.states.set(item.id,e.message);continue;}
       }
       if(drawn+template.triangles>DRAW_BUDGET){this.states.set(item.id,'场景网格预算已满，选中后优先显示真实模型。');continue;}
-      this.display.set(item.id,key);this.states.set(item.id,'真实STL · 已核对参考定位');drawn+=template.triangles;
+      this.display.set(item.id,key);this.states.set(item.id,template.note);drawn+=template.triangles;
     }
     if(epoch===this.epoch)this.notify();
   }

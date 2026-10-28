@@ -37,7 +37,7 @@ export function prepareElements(part,definition,copyFaces,removeSupports){
   const needed=definition.elements.some(e=>e.selection.connected!==undefined),groups=needed?connectedFaces(part.geometry):null;
   const total=definition.elements.reduce((n,e)=>n+e.selection.faces,0);
   if(total!==part.geometry.attributes.position.count/3*part.copies)throw Error('安装实体数量与原文件打印份数不一致。');
-  if(needed&&(definition.elements.length!==groups.length||new Set(definition.elements.map(e=>e.selection.connected)).size!==groups.length))throw Error('组合文件必须完整且不重复地覆盖每个实体。');
+  if(needed&&(definition.elements.length!==groups.length*part.copies||groups.some((_,i)=>definition.elements.filter(e=>e.selection.connected===i).length!==part.copies)))throw Error('组合文件必须按打印份数完整覆盖每个实体。');
   const owned=new Set(),result=[];
   try{
     for(const element of definition.elements){

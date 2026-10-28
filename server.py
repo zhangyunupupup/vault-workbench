@@ -16,6 +16,7 @@ from vault.geometry import preview
 from vault.recipes import plan
 from vault.scene import validate_scene
 from vault.assembly import assembly, mesh_header
+from vault.layout import layout, mesh_header as layout_mesh_header
 
 
 BASE = Path(__file__).resolve().parent
@@ -120,6 +121,13 @@ class Handler(BaseHTTPRequestHandler):
                 if revision != meta['mtime_ns']:
                     raise ValidationError('模型文件已变化，请重新加载装配步骤。')
                 return self.file(source, 'application/octet-stream')
+            if route.startswith('/api/layout-mesh/'):
+                source = current_catalog().resolve(route.rsplit('/', 1)[-1])
+                meta = layout_mesh_header(source)
+                revision = parse_qs(urlparse(self.path).query).get('revision', [''])[0]
+                if revision != meta['mtime_ns']:
+                    raise ValidationError('模型文件已变化，请重新读取组合模型。')
+                return self.file(source, 'application/octet-stream')
             if route == "/":
                 return self.file(BASE / "web" / "index.html", "text/html; charset=utf-8")
             if route.startswith("/assets/"):
@@ -162,6 +170,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.json(validate_scene(current_catalog(), payload))
             if route == '/api/assembly':
                 return self.json(assembly(current_catalog(), payload))
+            if route == '/api/layout':
+                return self.json(layout(current_catalog(), payload))
             if route == "/api/export":
                 return self.json(EXPORTS.start(current_catalog(), payload), 202)
             if route == "/api/open-output":
