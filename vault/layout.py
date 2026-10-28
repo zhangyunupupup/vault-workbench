@@ -13,6 +13,7 @@ from .colors import colored, validate_colors
 from .recipes import Recipe
 
 DATA = Path(__file__).with_name('layout_data.json')
+OPTION_DATA = Path(__file__).with_name('layout_options.json')
 MAX_FACES = 3200000
 
 
@@ -63,13 +64,11 @@ def layout(catalog, payload):
     cfg = {**cfg, 'quantity': 1}
     recipe = Recipe(catalog).build(cfg)
     kind = cfg.get('kind', 'drawer')
-    if (cfg.get('interior', 'none') != 'none' or cfg.get('base', 'none') != 'none'
-            or cfg.get('mount', 'none') != 'none'
-            or any(cfg.get(k) for k in ('wheels', 'top_handle', 'split_roof'))
-            or kind == 'drawer' and (cfg.get('key', 'standard') != 'standard' or cfg.get('roof', 'grid') not in ('grid', 'none'))):
-        raise ValidationError('当前附加选配尚未建立组合定位；显示简化外形。')
+    plain = (cfg.get('interior', 'none') == 'none' and cfg.get('base', 'none') == 'none'
+             and cfg.get('mount', 'none') == 'none' and not any(cfg.get(k) for k in ('wheels','top_handle','split_roof'))
+             and (kind != 'drawer' or cfg.get('key', 'standard') == 'standard' and cfg.get('roof', 'grid') in ('grid','none')))
     # Preserve the two installation-checked baseline assemblies exactly.
-    if (cfg.get('family', 'S') == 'S' and cfg.get('depth', 3) == 3
+    if (plain and cfg.get('family', 'S') == 'S' and cfg.get('depth', 3) == 3
             and cfg.get('height', 1) == (1 if kind == 'drawer' else 2)
             and (kind != 'drawer' or cfg.get('drawers', [1]) == [1] and not cfg.get('rails'))):
         from .assembly import assembly
@@ -84,13 +83,22 @@ def layout(catalog, payload):
         row = data['models'][model_key(cfg)]
     except (OSError, ValueError, KeyError):
         raise ValidationError('当前型号尚未建立真实模型定位。')
+    try:
+        options = json.loads(OPTION_DATA.read_text(encoding='utf-8'))
+        if options.get('version') != 1 or not all(isinstance(options.get(k),dict) for k in ('files','poses')):raise ValueError('invalid options')
+    except (OSError,ValueError):
+        options = {'files':{},'poses':{}}
+    references = {**data['files'], **options['files']}
+    def option_nodes(height=None):
+        return [deepcopy(e) for nodes in options['poses'].get(model_key(cfg,height),{}).values() for e in nodes]
     elements = []
     if kind == 'drawer':
         elements.extend(deepcopy(e) for e in row['elements'] if e['scope'] == 'module')
+        elements.extend(e for e in option_nodes() if e['scope']=='module')
         offset = 0
         for index, height in enumerate(cfg.get('drawers', [cfg.get('height', 1)])):
             inner = data['models'][model_key(cfg, height)]
-            for e in inner['elements']:
+            for e in [*inner['elements'],*option_nodes(height)]:
                 if e['scope'] != 'drawer' or e.get('label_covered') and cfg.get('labels', True):
                     continue
                 e = deepcopy(e)
@@ -99,11 +107,13 @@ def layout(catalog, payload):
                 elements.append(e)
             offset += height * 48
     else:
-        elements = deepcopy(row['elements'])
+        elements = deepcopy(row['elements']) + option_nodes()
     # Merge whole-file print copies without confusing them with connected bodies.
     parts = {}
     colors = validate_colors(cfg.get('colors', {}))
     omitted = []
+    omitted_details = []
+    tools = []
     for part in recipe['parts']:
         if part['id'] in parts:
             parts[part['id']]['copies'] += part['copies']
@@ -116,17 +126,28 @@ def layout(catalog, payload):
         if e['file'] in selected:
             selected[e.pop('file')].append(e)
     composition = []
+    estimated_cache = 0
+    def omit(part,reason):
+        omitted.append(part['name'])
+        omitted_details.append({'id':part['id'],'name':part['name'],'title':part['title'],'copies':part['copies'],'reason':reason})
     for ident, part in parts.items():
-        if ident not in data['files']:
-            if part['name'].endswith(' Rails.stl'):
-                omitted.append(part['name'])
-                continue
-            raise ValidationError('所选零件尚未建立定位：' + part['name'])
-        reference = data['files'][ident]
-        source = catalog.resolve(ident)
-        header = mesh_header(source)
-        if header['faces'] != reference['faces'] or digest(str(source), header['bytes'], int(header['mtime_ns'])) != reference['sha256']:
-            raise ValidationError('模型版本与定位目录不符，请使用对应版本模型库。')
+        if part['name']=='Jig.stl' or part['name'].endswith('F Wall Mount.stl'):
+            tools.append({'id':ident,'name':part['name'],'title':part['title'],'copies':part['copies'],
+                          'reason':'安装治具 / 定位模板，不装在成品上'})
+            continue
+        if ident not in references or not selected[ident]:
+            omit(part,'安装定位待核对；打印清单保留')
+            continue
+        reference = references[ident]
+        try:
+            source = catalog.resolve(ident)
+            header = mesh_header(source)
+            if header['faces'] != reference['faces'] or digest(str(source), header['bytes'], int(header['mtime_ns'])) != reference['sha256']:
+                raise ValidationError('模型版本与定位目录不符，请使用对应版本模型库。')
+        except ValidationError:
+            if reference['role'] in ('shell','body'):raise
+            omit(part,'零件读取失败或版本不符；打印清单保留')
+            continue
         part.update(header)
         nodes = selected[ident]
         if reference['role'] == 'latch' and len(nodes) == 1:
@@ -137,13 +158,21 @@ def layout(catalog, payload):
         if (sum(e['selection']['faces'] for e in nodes) != header['faces'] * part['copies']
                 or len(counts) != expected or any(n != part['copies'] for n in counts.values())):
             raise ValidationError('真实模型实体与打印份数不一致：' + part['name'])
+        estimate=header['faces']*(part['copies'] if 'components' in reference else 1)
+        if ident in options['files'] and estimated_cache+estimate>8000000:
+            omit(part,'超过真实模型缓存预算；打印清单保留')
+            continue
+        estimated_cache+=estimate
         composition.append({'id': ident, 'sha256': reference['sha256'], 'elements': nodes})
-    shown = [p for ident, p in parts.items() if p['name'] not in omitted]
+    shown_ids={p['id'] for p in composition}
+    shown = [p for ident, p in parts.items() if ident in shown_ids]
     note = '原始 STL 与实测孔位建立的组合外观参考；未开放此型号的安装动画。'
     if omitted:
-        note += '齿条尚未定位，预览省略；打印清单仍完整保留。'
+        note += '部分附件未显示，打印清单仍完整保留。'
     profile = {'id': 'layout-reference-v1', 'mode': 'composition', 'motion': 'explode',
                'composition': composition, 'display_count': sum(len(p['elements']) for p in composition)}
     return {'version': 1, 'title': recipe['title'], 'layout_ready': True, 'coverage_complete': False,
             'precision_ready': False, 'parts': shown, 'joints': [profile], 'omitted': omitted,
+            'omitted_details':omitted_details,'tools':tools,
+            'anchor_floor':'assembly' if any(references[p['id']]['role']=='base' for p in composition) else 'shell',
             'mesh_route': '/api/layout-mesh', 'note': note}

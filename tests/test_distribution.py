@@ -15,6 +15,7 @@ class DistributionContracts(unittest.TestCase):
     def test_source_and_demo_scope(self):
         files=source_files()
         self.assertTrue(any(p.name=='server.py' for p in files))
+        self.assertTrue(any(p.name=='layout_options.json' for p in files))
         self.assertFalse(any(p.suffix.lower() in ('.stl','.pdf','.3mf','.pyc') or {'runtime','exports','tmp','python'}&set(p.relative_to(BASE).parts) for p in files))
         demo=demo_files()
         self.assertTrue(any(p.name=='sw.js' for p in demo))

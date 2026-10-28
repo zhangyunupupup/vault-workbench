@@ -3,7 +3,7 @@ import {prepareElements,elementMatrix} from './assembly-pose.js';
 import {readSTL,copyFaces,supportRemovedGeometry} from '/assembly-stage.js';
 import {indexedGeometry} from './layout-mesh-loader.js';
 
-export const DRAW_BUDGET=20000000,CACHE_BUDGET=8000000;
+export const DRAW_BUDGET=20000000,CACHE_BUDGET=12000000;
 const clone=v=>structuredClone(v);
 function sorted(value){return Array.isArray(value)?value.map(sorted):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().filter(k=>!['colors','quantity'].includes(k)).map(k=>[k,sorted(value[k])])):value;}
 export const modelKey=config=>JSON.stringify(sorted(config));
@@ -16,9 +16,7 @@ const hash=async buffer=>Array.from(new Uint8Array(await crypto.subtle.digest('S
 export function candidate(c){
   const kind=c.kind??'drawer',family=c.family??'S',height=c.height??1,drawers=c.drawers??[height];
   return ['drawer','sustainer'].includes(kind)&&['S','M','L','XL'].includes(family)&&[3,4,5,6,7].includes(c.depth??3)&&[1,2,4].includes(height)
-    &&(c.interior??'none')==='none'&&(c.base??'none')==='none'&&(c.mount??'none')==='none'
-    &&!['wheels','top_handle','split_roof'].some(k=>c[k])
-    &&(kind==='drawer'?family!=='XL'&&(c.key??'standard')==='standard'&&Array.isArray(drawers)&&drawers.length>0&&drawers.every(h=>[1,2,4].includes(h))&&drawers.reduce((a,b)=>a+b,0)===height&&['none','grid'].includes(c.roof??'grid')
+    &&(kind==='drawer'?family!=='XL'&&Array.isArray(drawers)&&drawers.length>0&&drawers.every(h=>[1,2,4].includes(h))&&drawers.reduce((a,b)=>a+b,0)===height
       :(['S','M'].includes(family)?(c.variant??'standard')==='standard':(family!=='XL'||height===1)&&['flat','dividers','sealed'].includes(c.variant??'flat')));
 }
 export function instantiate(template,item){
@@ -75,10 +73,13 @@ export async function loadTemplate(guide,{fetchMesh=fetch,signal}={}){
     // Rotated print orientations make a transformed source AABB too large.
     // Measure installed vertices themselves before anchoring to the floor.
     const box=transformedBounds(shell.geometry,anchor.clone().multiply(shell.matrix));
+    if(guide.anchor_floor==='assembly')for(const node of nodes)box.min.y=Math.min(box.min.y,transformedBounds(node.geometry,anchor.clone().multiply(node.matrix)).min.y);
     anchor.setPosition(-box.min.x,-box.min.y,-box.min.z);
     const bounds=new THREE.Box3();for(const node of nodes)bounds.union(transformedBounds(node.geometry,anchor.clone().multiply(node.matrix)));
     const cacheFaces=[...geometry].reduce((n,g)=>n+(g.index?.count??g.attributes.position.count)/3,0);
-    return {nodes,anchor,bounds,triangles,cacheFaces,geometry,note:guide.omitted?.length?'真实STL · 齿条未定位，预览省略；打印清单保留':'真实STL · 已核对参考定位',dispose(){geometry.forEach(g=>g.dispose());geometry.clear();}};
+    const missing=guide.omitted_details?.map(p=>p.title)||guide.omitted||[],partial=missing.length>0;
+    const note=partial?`真实箱体 · ${missing.length}项附件未显示，打印清单保留`:'真实STL · 已核对参考定位';
+    return {nodes,anchor,bounds,triangles,cacheFaces,geometry,partial,note,omissions:guide.omitted_details||[],tools:guide.tools||[],dispose(){geometry.forEach(g=>g.dispose());geometry.clear();}};
   }catch(e){geometry.forEach(g=>g.dispose());throw e;}
 }
 
@@ -96,7 +97,7 @@ export class BuilderDetails {
     this.display.clear();this.states.clear();
     if(!this.enabled){this.notify();return;}
     const priority=[...items].sort((a,b)=>Number(b.id===selected)-Number(a.id===selected));
-    const keys=[...new Set(priority.filter(i=>candidate(i.config)).map(i=>modelKey(i.config)))].slice(0,2);
+    const keys=[...new Set(priority.filter(i=>candidate(i.config)).map(i=>modelKey(i.config)))];
     // Evict templates not being used by this update before allocating new meshes.
     for(const [key,value]of this.cache)if(!keys.includes(key)){value.dispose();this.cache.delete(key);}
     const failures=new Map();let drawn=0,cached=[...this.cache.values()].reduce((n,v)=>n+(v.cacheFaces??v.triangles),0);
@@ -112,7 +113,7 @@ export class BuilderDetails {
       if(epoch!==this.epoch)return;
       const key=modelKey(item.config);
       if(!candidate(item.config)){this.states.set(item.id,'此型号 / 选配尚未核对，显示简化外形。');continue;}
-      if(!keys.includes(key)){this.states.set(item.id,'真实模型缓存预算已满，选中后优先加载。');continue;}
+      if(drawn>=DRAW_BUDGET){this.states.set(item.id,'场景网格预算已满，选中后优先显示真实模型。');continue;}
       if(failures.has(key)){this.states.set(item.id,failures.get(key));continue;}
       let template=this.cache.get(key);
       if(!template){
@@ -120,6 +121,9 @@ export class BuilderDetails {
         try{
           const guide=await this.api('/api/layout',{config:item.config});
           if(epoch!==this.epoch)return;
+          const profile=guide.joints?.find(p=>p.mode==='composition'&&p.motion==='explode');
+          const drawFaces=profile?.composition.reduce((n,p)=>n+p.elements.filter(e=>e.accuracy!=='spare').reduce((sum,e)=>sum+e.selection.faces,0),0);
+          if(drawn+(drawFaces||0)>DRAW_BUDGET)throw Error('场景网格预算已满，选中后优先显示真实模型。');
           const faces=guide.parts.reduce((n,p)=>n+p.faces,0);makeRoom(faces);
           template=await loadTemplate(guide,{fetchMesh:this.fetchMesh,signal});
           if(epoch!==this.epoch){template.dispose();return;}

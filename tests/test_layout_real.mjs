@@ -22,7 +22,10 @@ for(const guide of fixtures){
   const object=instantiate(template,{id:'test',colors:{body:'#848987',drawer:'#000000',facade:'#FFFFFF',accessory:'#FF6A13'}});object.updateMatrixWorld(true);
   const index=template.nodes.findIndex(n=>/\bModule\b/i.test(n.name));
   const box=new THREE.Box3().setFromObject(object.children[index],true);
-  assert.ok(box.min.toArray().every(v=>Math.abs(v)<.0001));
+  if(guide.anchor_floor==='assembly'){
+    assert.ok(box.min.y>0);assert.ok(Math.abs(box.min.x)<.0001&&Math.abs(box.min.z)<.0001);
+    assert.ok(Math.abs(new THREE.Box3().setFromObject(object,true).min.y)<.0001,'Base reaches the floor while lifting the body.');
+  }else assert.ok(box.min.toArray().every(v=>Math.abs(v)<.0001));
   assert.ok(Math.abs(box.max.x-guide.expected_width)<.2);
   assert.ok(Math.abs(box.max.z-guide.expected_depth)<.2);
   assert.equal(template.nodes.length,guide.expected_entities);

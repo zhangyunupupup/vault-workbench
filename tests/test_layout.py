@@ -100,7 +100,9 @@ class RealLayoutContracts(unittest.TestCase):
             self.guide(cfg)
         self.assertFalse(assembly(self.catalog,{'config':cfg})['supported'])
         with self.assertRaises(ValidationError):self.guide({**cfg,'family':'XL'})
-        with self.assertRaises(ValidationError):self.guide({**cfg,'key':'hidden'})
+        partial=self.guide({**cfg,'key':'hidden'})
+        self.assertTrue(partial['layout_ready'])
+        self.assertIn('Hidden Key (Turn On Supports).stl',partial['omitted'])
 
     def test_catalog_reloads_and_rejects_mirrored_or_nonfinite_pose(self):
         bad=deepcopy(self.data)

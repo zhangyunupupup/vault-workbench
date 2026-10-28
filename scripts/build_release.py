@@ -10,7 +10,7 @@ from pathlib import Path, PurePosixPath
 import zipfile
 
 BASE=Path(__file__).resolve().parents[1]
-VERSION='2.3.0'
+VERSION='2.4.0'
 PYTHON_VERSION='3.14.10'
 PYTHON_URL='https://www.python.org/ftp/python/3.14.10/python-3.14.10-embed-amd64.zip'
 PYTHON_SHA256='90905e64a840557d8c1bc4f5b74db3d7ee85e3ffb217611cac1c7813acea4159'

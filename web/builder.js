@@ -18,13 +18,19 @@ export function initBuilder({api,getConfig,getCatalog,onExport,toast}) {
   const current=()=>scene.items.find(i=>i.id===selected);
   const realControls=document.createElement('div');realControls.className='builder-real-controls';
   realControls.innerHTML='<button id="build-real" aria-pressed="true">真实模型 · 开</button><button id="build-real-reload">重新读取</button><span id="build-detail-status" role="status">正在准备真实模型预览…</span>';
+  const detailInfo=document.createElement('details'),detailSummary=document.createElement('summary'),detailList=document.createElement('ul');
+  detailInfo.id='build-detail-info';detailInfo.hidden=true;detailInfo.append(detailSummary,detailList);realControls.append(detailInfo);
   $('build-stage').before(realControls);
-  const scope=host.querySelector('.builder-scope');scope.textContent='真实模型仅用于查看已核对打印件的外观与参考定位。包络检查仍不包含突出件、开合空间和嵌合，不代表装配或承载认证；弹性件沿用装配页的形变示意，备用连接扣不安装在箱体上。';
+  const scope=host.querySelector('.builder-scope');scope.textContent='真实外观按已核对零件显示，选择框跟随显示外形；未定位附件单独提示，打印清单保留。带底座时整套落地，布局校验仍按原箱体参考包络，未计入附件、开合空间与嵌合。模板和治具不装在成品上；外观参考不代表装配或承载认证。';
   function detailChanged(){
     if(!details)return;
     const count=details.display.size,total=scene.items.length;
-    host.querySelector('.builder-stage-caption span').textContent=count?`真实STL ${count} / ${total} · ${count===total?'全部已加载':'其他简化'}`:'简化外形 · 参考包络';
+    const partial=[...details.display.values()].some(key=>details.cache.get(key)?.partial);
+    host.querySelector('.builder-stage-caption span').textContent=count?`真实箱体 ${count} / ${total} · ${partial?'部分附件未显示':count===total?'全部已加载':'其他简化'}`:'简化外形 · 参考包络';
     $('build-detail-status').textContent=details.enabled?(details.states.get(selected)||'当前可选型号均支持基础箱体真实 STL；选配定位范围见说明。'):'已切换简化布局，可随时打开真实模型。';
+    const template=details.enabled?details.cache.get(details.display.get(selected)):null,omissions=template?.omissions||[],tools=template?.tools||[];
+    detailInfo.hidden=!(omissions.length||tools.length);detailSummary.textContent=`预览范围说明 · 未显示${omissions.length}项 / 模板与治具${tools.length}项`;
+    detailList.replaceChildren(...[...omissions,...tools].map(p=>{const li=document.createElement('li');li.textContent=`${p.title} × ${p.copies}｜${p.reason}`;return li;}));
     stage?.update(scene.items,selected,checks);
   }
   const assemblyButton=document.createElement('button');assemblyButton.id='build-assembly';assemblyButton.className='outline-button';assemblyButton.textContent='查看选中箱体的装配步骤 ↗';

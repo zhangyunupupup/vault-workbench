@@ -38,5 +38,14 @@ export class DetailedBuilderStage extends BuilderStage {
     const center=box.isEmpty()?new THREE.Vector3():box.getCenter(new THREE.Vector3()),radius=box.isEmpty()?250:Math.max(...box.getSize(new THREE.Vector3()).toArray(),200)*.8;
     this.keyLight.target.position.copy(center);this.keyLight.position.copy(center).add(new THREE.Vector3(-radius*1.5,radius*2,radius*1.5));
     Object.assign(this.keyLight.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,near:1,far:radius*8});this.keyLight.shadow.camera.updateProjectionMatrix();super.update(items,selected,checks);
+    // Selection follows the visible model, including a taller roof or base.
+    // The independent layout validator still uses its documented envelope.
+    for(const group of this.groups){
+      const detail=group.children.find(c=>c.userData.layoutBounds),outline=group.children.find(c=>c.isLineSegments);
+      if(!detail||!outline)continue;
+      const bounds=detail.userData.layoutBounds,size=bounds.getSize(new THREE.Vector3()).addScalar(2),box=new THREE.BoxGeometry(size.x,size.y,size.z);
+      outline.geometry.dispose();outline.geometry=new THREE.EdgesGeometry(box);box.dispose();outline.position.copy(bounds.getCenter(new THREE.Vector3()));
+    }
+    this.draw();
   }
 }
